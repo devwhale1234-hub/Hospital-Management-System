@@ -1160,7 +1160,7 @@ void applyLeave(doctor Doctors[], int s) {
 
 
 //pateint portal 
-void patientPortal(doctor d[], patient& p, int doctorSize, prescription& pres , appointmentScheduling * as )
+void patientPortal()
 {
     int choice = 0 ; 
     while (choice != 8)
@@ -1180,13 +1180,13 @@ void patientPortal(doctor d[], patient& p, int doctorSize, prescription& pres , 
         {
         case 1:
 
-            viewDoctors(d, doctorSize); 
+           // viewDoctors(d, doctorSize); 
             break; 
         case 2:
-            as->scheduleAppointment( p , d , doctorSize); 
+            //as->scheduleAppointment( p , d , doctorSize); 
             break; 
         case 3:
-            p.getRecord(); 
+          //  p.getRecord(); 
             break; 
         case 4:
             // prescription 
@@ -1556,39 +1556,38 @@ void bootup(doctor * & docPtr , patient * & patPtr , int & docSize , int & patSi
 {
     int loopController = 0; 
     string dummy; 
-    ifstream infile("doctor.txt");
-    if (!infile)
+    ifstream infilecountingdoc("doctor.txt");
+    if (!infilecountingdoc)
     {
         cout << "Cannot open file" << endl; 
     }
-    while (getline(infile ,dummy))
+    while (getline(infilecountingdoc ,dummy))
     {
         docSize++; 
     }
-    infile.close(); 
+    infilecountingdoc.close(); 
     docPtr = new doctor[docSize]; 
-    ifstream infile("patient.txt");
-    if (!infile)
+    ifstream infilecountingpatient("patient.txt");
+    if (!infilecountingpatient)
     {
         cout << "Cannot open file" << endl;
     }
 
-    while (getline(infile, dummy))
+    while (getline(infilecountingpatient, dummy))
     {
         patSize++;
     }
-    infile.close();
+    infilecountingpatient.close();
     patPtr = new patient[patSize]; 
     // doctor 
-    ifstream infile("doctor.txt"); 
-    if (!infile)
+    ifstream doctorfile("doctor.txt"); 
+    if (!doctorfile)
     {
         cout << "Cannot open file" << endl; 
     }
-    while (getline(infile, dummy) && loopController < docSize)
+    while (getline(doctorfile, dummy) && loopController < docSize)
     {
-        string dummy;
-        getline(infile, dummy);
+        
        
         int pos;
         pos = dummy.find(',');
@@ -1620,21 +1619,19 @@ void bootup(doctor * & docPtr , patient * & patPtr , int & docSize , int & patSi
         loopController++; 
 
     }
-    infile.close(); 
+    doctorfile.close(); 
 
     //patient
-    ifstream infile("patient.txt");
-    if (!infile)
+    ifstream patientfile("patient.txt");
+    if (!patientfile)
     {
         cout << "Cannot open file" << endl;
     }
     dummy = " "; 
     loopController = 0; 
-    while (getline(infile, dummy) && loopController < docSize)
+    while (getline(patientfile, dummy) && loopController < patSize)
     {
-        string dummy;
-        getline(infile, dummy);
-
+       
         int pos;
         pos = dummy.find(',');
         string id = dummy.substr(0, pos);
@@ -1661,7 +1658,7 @@ void bootup(doctor * & docPtr , patient * & patPtr , int & docSize , int & patSi
         loopController++;
 
     }
-    infile.close();
+    patientfile.close();
 
 
     
@@ -1678,7 +1675,7 @@ int main()
     int doctorSize = 0 ; 
     int patientSize = 0 ; 
     bool registrationVerifier = false; 
-    bootup( doctorPtr , patientPtr , doctorSize , patientSize); 
+    // bootup( doctorPtr , patientPtr , doctorSize , patientSize); 
     cout << "-----Welcome to the Hospital Managment System------" << endl; 
     int choice = 0 ; 
     while ( choice != 4)
