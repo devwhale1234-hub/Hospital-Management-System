@@ -298,10 +298,6 @@ public:
     {
         return doctorSalary;
     }
-    ~doctor()
-    {
-		delete app_detail;
-    }
 };
 
 class patient : public common_person
@@ -868,7 +864,7 @@ void removeDoctor(doctor Doctors[], int& s) {
             ofstream outFile("doctors.txt");
             if (outFile) {
                 for (int k = 0; k < s; k++) {
-                    outFile << "Name: " << Doctors[k].getcommonpersonName() << " ID: " << Doctors[k].getcommonpersonID() << " Age: " << Doctors[k].getcommonpersonAge() << " Type: " << Doctors[k].getdoctorType() << " Fee: " << Doctors[k].getdoctorFee() << " Salary: " << Doctors[k].getdoctorSalary() << endl;
+                    outFile << "Name: " << Doctors[k].getcommonpersonName() << " ID: " << Doctors[k].getcommonpersonID()<< " Age: " << Doctors[k].getcommonpersonAge()<< " Type: " << Doctors[k].getdoctorType() << " Fee: " << Doctors[k].getdoctorFee() << " Salary: " << Doctors[k].getdoctorSalary() << endl;
                 }
                 outFile.close();
             }
@@ -1020,7 +1016,7 @@ void editSalary(doctor Doctors[], int s) {
 }
 
 
-void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &cap) {
+void adminPortal(doctor Doctors[], patient Patients[], Room* rooms[],int roomC, appointmentScheduling& scheduler, int &ds,int &dcap, int &ps, int &pcap) {
     cout << "Welcome to the Admin Portal" << endl;
     cout << "1. Add Doctor" << endl;
     cout << "2. View Doctors" << endl;
@@ -1036,27 +1032,27 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
     cin >> choice;
     if (choice == 1) {
         cout << "Adding a new doctor" << endl;
-        addDoctor(Doctors, s, cap);
+        addDoctor(Doctors, ds, dcap);
     }
     else if (choice == 2)
     {
         cout << "Viewing all doctors" << endl;
-        viewDoctors(Doctors, s);
+        viewDoctors(Doctors, ds);
     }
     else if (choice == 3)
     {
         cout << "Removing a doctor" << endl;
-        removeDoctor(Doctors, s);
+        removeDoctor(Doctors, ds);
     }
     else if (choice == 4)
     {
         cout << "Viewing patient details" << endl;
-        seePatientDetails(Patients, s);
+        seePatientDetails(Patients, ps);
     }
     else if (choice == 5)
     {
         cout << "Viewing room details" << endl;
-        seeRoomDetails(rooms, s);
+        seeRoomDetails(rooms,roomC);
     }
     else if (choice == 6)
     {
@@ -1078,23 +1074,23 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
         cin >> Choice;
         if (Choice == 1)
         {
-            editSpecialization(Doctors, s);
+            editSpecialization(Doctors, ds);
         }
         else if (Choice == 2)
         {
-            editStatus(Doctors, s);
+            editStatus(Doctors, ds);
         }
         else if (Choice == 3)
         {
-            editFee(Doctors, s);
+            editFee(Doctors, ds);
         }
         else if (Choice == 4)
         {
-            editSalary(Doctors, s);
+            editSalary(Doctors, ds);
         }
         else if (Choice == 5)
         {
-            editDoctorDetails(Doctors, s);
+            editDoctorDetails(Doctors, ds);
         }
         else if (Choice == 6)
         {
@@ -1108,7 +1104,7 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
     else if (choice == 8)
     {
         cout << "Editing patient details" << endl;
-        editPatientDetails(Patients, s);
+        editPatientDetails(Patients, ps);
     }
     else
     {
@@ -1268,7 +1264,7 @@ void applyLeave(doctor Doctors[], int s) {
     }
     cout << "Doctor not found." << endl;
 }
-void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &capa) {
+void doctorPortal(doctor Doctors[], patient Patients[], Room* rooms[], appointmentScheduling& scheduler, int &ds,int &cap,int &ps, int &capa) {
     cout << "Welcome to the Doctor Portal" << endl;
     int choice = 0;
     while (choice != 10) {
@@ -1288,32 +1284,32 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
         switch (choice)
         {
         case 1:
-            viewAllpatients(Patients, s);
+            viewAllpatients(Patients, ps);
             break;
         case 2:
-            viewHealthRecord(Patients, s);
+            viewHealthRecord(Patients, ps);
             break;
         case 3:
-            viewPrescription(Patients, s);
+            viewPrescription(Patients, ps);
             break;
         case 4:
-            setStatus(Doctors, s);
+            setStatus(Doctors, ds);
             break;
         case 5:
-            setFee(Doctors, s);
+            setFee(Doctors, ds);
             break;
         case 6:
             seeAppointments(scheduler);
             break;
 
         case 7:
-            addPatient(Patients, s, capa);
+            addPatient(Patients, ps, capa);
             break;
         case 8:
-            removePatient(Patients, s);
+            removePatient(Patients, ps);
             break;
         case 9:
-            applyLeave(Doctors, s);
+            applyLeave(Doctors, ds);
             break;
         default:
             cout << "work" << endl;
