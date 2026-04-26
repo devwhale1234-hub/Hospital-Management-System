@@ -1,0 +1,17 @@
+
+1. Name: Dr. Usman, ID, 001, Age, 45, Type, General, Fee, 2000, Salary, 150,000
+2. Name: Dr. Yousaf, ID, 002, Age, 38, Type, General, Fee, 1900, Salary, 140,000
+3. Name: Dr. Hamdan, ID, 003, Age, 50, Type, General, Fee, 2100, Salary, 160,000
+4. Name: Dr. Anoosha, ID, 004, Age, 42, Type, General, Fee, 1950, Salary, 145,000
+5. Name: Dr. Saad, ID, 005, Age, 48, Type, General, Fee, 2050, Salary, 155,000
+6. Name: Dr. Arham, ID, 006, Age, 40, Type, Surgeon, Fee, 200, Salary, 250,000
+7. Name: Dr. Musa, ID, 007, Age, 35, Type, Surgeon, Fee, 180, Salary, 230,000
+8. Name: Dr. Shahmeer, ID, 008, Age, 45, Type, Surgeon, Fee, 220, Salary, 270,000
+9. Name: Dr. Gojo, ID, 009, Age, 38, Type, Surgeon, Fee, 190, Salary, 240,000
+10. Name: Dr. Farhan, ID, 010, Age, 50, Type, Surgeon, Fee, 210, Salary, 260,000
+11. Name: Dr. Rafey, ID, 011, Age, 42, Type, Cardiologist, Fee, 150, Salary, 200,000
+12. Name: Dr. Sara, ID, 012, Age, 48, Type, Cardiologist, Fee, 160, Salary, 210,000
+13. Name: Dr. Abdullah, ID, 013, Age, 40, Type, Cardiologist, Fee, 140, Salary, 190,000
+14. Name: Dr. Wajahat, ID, 014, Age, 45, Type, Cardiologist, Fee, 155, Salary, 205,000
+15. Name: Dr. Babar Azam, ID, 015, Age, 38, Type, Cardiologist, Fee, 145, Salary, 195,000
+

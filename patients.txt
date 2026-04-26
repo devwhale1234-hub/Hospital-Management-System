@@ -1,0 +1,6 @@
+// id, name , age , type, symptoms, diagnose 5 patients at start 
+1. ID, 001, Name, Ali, Age, 30, Type, Simple Care, Symptoms, Fever , Diagnose, Common Cold
+2. ID, 002, Name, Sara, Age, 25, Type, Simple Care, Symptoms, Headache , Diagnose, Migraine
+3. ID, 003, Name, Ahmed, Age, 40, Type, Critical, Symptoms, Abdominal Pain, Diagnose, Stomach pain
+4. ID, 004, Name, Fatima, Age, 35, Type, Critical, Symptoms, Chest Pain , Diagnose, Angina
+5. ID, 005, Name, Hassan, Age, 50, Type, Simple Care, Symptoms, Back Pain , Diagnose, Arthritis
