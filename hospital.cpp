@@ -1020,7 +1020,7 @@ void editSalary(doctor Doctors[], int s) {
 }
 
 
-void adminPortal(doctor Doctors[], patient Patients[], Room* rooms[], appointmentScheduling& scheduler, int s, int cap) {
+void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &cap) {
     cout << "Welcome to the Admin Portal" << endl;
     cout << "1. Add Doctor" << endl;
     cout << "2. View Doctors" << endl;
@@ -1268,7 +1268,7 @@ void applyLeave(doctor Doctors[], int s) {
     }
     cout << "Doctor not found." << endl;
 }
-void doctorPortal(doctor Doctors[], patient Patients[], Room* rooms[], appointmentScheduling& scheduler, int s, int capa) {
+void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &capa) {
     cout << "Welcome to the Doctor Portal" << endl;
     int choice = 0;
     while (choice != 10) {
