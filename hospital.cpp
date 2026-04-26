@@ -298,6 +298,10 @@ public:
     {
         return doctorSalary;
     }
+    ~doctor()
+    {
+		delete app_detail;
+    }
 };
 
 class patient : public common_person
@@ -797,7 +801,7 @@ public:
         }
     }
 };
-void addDoctor(doctor Doctors[], int& s, int& cap) {
+void addDoctor(doctor*& Doctors, int& s, int& cap) {
     if (s >= cap) {
         cap = cap + 3;
         doctor* newArr = new doctor[cap];
@@ -851,8 +855,7 @@ void viewDoctors(doctor Doctors[], int s)
     }
 }
 void removeDoctor(doctor Doctors[], int& s) {
-
-    cout << "Enter doctor name to remove: ";
+    cout << "Enter doctor ID to remove: ";
     string id;
     cin >> id;
 
@@ -862,21 +865,20 @@ void removeDoctor(doctor Doctors[], int& s) {
                 Doctors[j] = Doctors[j + 1];
             }
             s--;
-            cout << "Doctor " << id << " removed successfully." << endl;
+            ofstream outFile("doctors.txt");
+            if (outFile) {
+                for (int k = 0; k < s; k++) {
+                    outFile << "Name: " << Doctors[k].getcommonpersonName() << " ID: " << Doctors[k].getcommonpersonID() << " Age: " << Doctors[k].getcommonpersonAge() << " Type: " << Doctors[k].getdoctorType() << " Fee: " << Doctors[k].getdoctorFee() << " Salary: " << Doctors[k].getdoctorSalary() << endl;
+                }
+                outFile.close();
+            }
+            cout << "Doctor removed successfully." << endl;
             return;
         }
     }
     cout << "Doctor not found." << endl;
-    ofstream outFile("doctors.txt");
-    if (!outFile) {
-        cout << "Error opening file." << endl;
-        return;
-    }
-    for (int i = 0; i < s; i++) {
-        outFile << "Name: " << Doctors[i].getcommonpersonName() << " ID: " << Doctors[i].getcommonpersonID() << " Age: " << Doctors[i].getcommonpersonAge() << " Type: " << Doctors[i].getdoctorType() << "Fee: " << Doctors[i].getdoctorFee() << " Salary: " << Doctors[i].getdoctorSalary() << endl;
-    }
-    outFile.close();
 }
+
 void seePatientDetails(patient Patients[], int s) {
     cout << "List of Patients:" << endl;
     for (int i = 0; i < s; i++) {
@@ -1191,7 +1193,7 @@ void seeAppointments(appointmentScheduling& scheduler) {
     cout << "Viewing appointments" << endl;
     scheduler.successfulAppointment();
 }
-void addPatient(patient Patients[], int& s, int& capa) {
+void addPatient(patient*& Patients, int& s, int& capa) {
     if (s >= capa) {
         capa = capa + 3;
         patient* newArr = new patient[capa];
@@ -1233,7 +1235,7 @@ void addPatient(patient Patients[], int& s, int& capa) {
         outFile.close();
     }
 }
-void removePatient(patient Patients[], int& s) {
+void removePatient(patient*& Patients, int& s) {
     cout << "Enter patient name to remove: ";
     string name;
     cin >> name;
