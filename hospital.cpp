@@ -1,6 +1,9 @@
-#include<iostream>
-#include<fstream>
-using namespace std;
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std; 
+
+//appointnment details class 
 class appointmentDetail
 {
     string appointmentbyName;
@@ -71,6 +74,8 @@ public:
         return  appointmentDay;
     }
 };
+
+//health record class 
 class healthRecords
 {
     string symptoms;
@@ -109,38 +114,39 @@ public:
 
 };
 
+//base person class
 class common_person
 {
-    string common_person_id;
-    string common_person_name;
-    int common_person_age;
+    string common_person_id; 
+    string common_person_name; 
+    int common_person_age; 
 
-public:
+public :
 
     common_person()
     {
         common_person_id = " ";
-        common_person_name = " ";
-        common_person_age = 0;
+        common_person_name = " "; 
+        common_person_age = 0; 
     }
 
-    common_person(string id, string name, int age)
+    common_person(string id, string name , int age )
     {
-        common_person_id = id;
-        common_person_name = name;
-        common_person_age = age;
+        common_person_id = id; 
+        common_person_name = name; 
+        common_person_age = age; 
     }
 
     common_person(common_person& p)
     {
-        this->common_person_id = p.common_person_id;
-        this->common_person_name = p.common_person_name;
-        this->common_person_age = p.common_person_age;
+        this->common_person_id = p.common_person_id; 
+        this->common_person_name = p.common_person_name; 
+        this->common_person_age = p.common_person_age; 
     }
 
     void setcommonpersonID(string id)
     {
-        common_person_id = id;
+        common_person_id = id; 
     }
     void setcommonpersonName(string name)
     {
@@ -153,26 +159,113 @@ public:
 
     string getcommonpersonID()
     {
-        return common_person_id;
+        return common_person_id; 
     }
     int getcommonpersonAge()
     {
-        return common_person_age;
+        return common_person_age; 
     }
     string getcommonpersonName()
     {
-        return common_person_name;
+        return common_person_name; 
     }
 
 };
-class doctor : virtual  public common_person
+
+//patient class
+class patient : public common_person
+{
+    string patientType;
+    healthRecords record;
+
+public :
+
+    patient()
+    {
+        patientType = "General"; 
+    }
+
+    patient(string id, string name,int age ,  string type , string symptom , string diagnose) : common_person(id, name , age ), patientType(type) , record(symptom , diagnose)
+    {
+       
+    }
+
+    patient(patient& p)
+    {
+        this->setcommonpersonID(p.getcommonpersonID()); 
+        this->setcommonpersonName(p.getcommonpersonName());
+        this->setcommonpersonAge(p.getcommonpersonAge()); 
+        this->patientType = p.patientType; 
+        this->record = p.record;  
+    }
+
+    void setpatientType(string type)
+    {
+        patientType = type; 
+    }
+
+    void setSymptoms(string symptom)
+    {
+        record.setSymptoms(symptom); 
+    }
+
+    void setDiagnosis(string diagnose)
+    {
+        record.setDiagnosis(diagnose);
+    }
+    void setRecord(healthRecords &h)
+    {
+        record = h; 
+    }
+    healthRecords& getRecord()
+    {
+        return record; 
+    }
+    string getSymptoms()
+    {
+        return record.getSymptoms(); 
+    }
+    string getDiagnosis()
+    {
+        return record.getDiagnosis();
+    }
+    string getpatientType()
+    {
+        return patientType; 
+    }
+
+    void display()
+    {
+        cout << "Patient Information" << endl;
+        cout << "Patient name : " << this->getcommonpersonName() << endl;
+        cout << "patient id : " << this->getcommonpersonID() << endl;
+        cout << "Patient Age : " << this->getcommonpersonAge() << endl;
+        cout << "Patient Type : " << patientType << endl;
+        cout << "Pateint Health Record " << endl;
+        cout << "Patient Symptoms : " << getSymptoms() << endl;
+        cout << "Pateitn Diagnosis : " << getDiagnosis() << endl;
+
+    }
+
+    
+};
+
+//admin class 
+class admin : public common_person
+{
+    string checkSuggestion; 
+    string checkComplain; 
+};
+
+//doctor class
+class doctor : public common_person
 {
     string doctorType;
     string doctorStatus;
     int doctorFee;
     int doctorSalary;
     bool appointmentStatus;
-    appointmentDetail* app_detail;
+    appointmentDetail* appdetailPtr; 
 
 public:
 
@@ -183,32 +276,31 @@ public:
         doctorFee = 0;
         doctorSalary = 0;
         appointmentStatus = false;
-        app_detail = NULL;
+        appdetailPtr = NULL;
     }
 
-    doctor(string id, string name, int age, string type, string status, int fee, int salary, bool app_status, appointmentDetail* ap) : common_person(id, name, age), doctorType(type), doctorStatus(status), doctorFee(fee), doctorSalary(salary), appointmentStatus(app_status), app_detail(ap)
+    doctor(string id, string name, int age, string type, string status, int fee, int salary, bool app_status, appointmentDetail * ap) : common_person(id, name, age), doctorType(type), doctorStatus(status), doctorFee(fee), doctorSalary(salary), appointmentStatus(app_status) , appdetailPtr(ap)
     {
 
     }
 
-    doctor(doctor& d)
+    
+doctor(doctor& d) {
+    this->setcommonpersonID(d.getcommonpersonID());
+    this->setcommonpersonName(d.getcommonpersonName());
+    this->setcommonpersonAge(d.getcommonpersonAge());
+    this->doctorType       = d.doctorType;
+    this->doctorStatus     = d.doctorStatus;
+    this->doctorFee        = d.doctorFee;
+    this->doctorSalary     = d.doctorSalary;
+    this->appointmentStatus = d.appointmentStatus;
+    if (d.appdetailPtr != NULL)
     {
-        this->setcommonpersonID(d.getcommonpersonID());
-        this->setcommonpersonName(d.getcommonpersonName());
-        this->setcommonpersonAge(d.getcommonpersonAge());
-        this->doctorType = d.doctorType;
-        this->doctorStatus = d.doctorStatus;
-        this->doctorFee = d.doctorFee;
-        this->doctorSalary = d.doctorSalary;
-        this->appointmentStatus = d.appointmentStatus;
-        this->app_detail = d.app_detail;
-        if (d.app_detail != NULL)
-        {
-            this->app_detail = new appointmentDetail(*d.app_detail);
-        }
-        else
-            this->app_detail = NULL;
+        this->appdetailPtr = new appointmentDetail(*d.appdetailPtr);
     }
+    else
+        this->appdetailPtr = NULL;
+}
 
     void setdoctorType(string type)
     {
@@ -226,7 +318,7 @@ public:
     {
         return appointmentStatus;
     }
-
+   
 
     void setdoctorFee(int fee)
     {
@@ -239,53 +331,53 @@ public:
 
     void setappointmentbyName(string name)
     {
-        app_detail->setappointmentbyName(name);   // at the place where we have done doctor[i].setstatus("free") then we have to d0
-    }                                             // doctor.getapp_detail()->setappointmentbyName(name) ; 
+        appdetailPtr->setappointmentbyName(name);   // at the place where we have done doctor[i].setstatus("free") then we have to d0
+    }                                             // doctor.getappdetailptr()->setappointmentbyName(name) ; 
     void setappointmentbyId(string id)
     {
-        app_detail->setappointmentbyId(id);
+        appdetailPtr->setappointmentbyId(id);
     }
     void setappointmenttoName(string name)
     {
-        app_detail->setappointmenttoName(name);
+        appdetailPtr->setappointmenttoName(name);
     }
     void setappointmenttoId(string id)
     {
-        app_detail->setappointmenttoId(id);
+        appdetailPtr->setappointmenttoId(id); 
     }
     void setappointmentDay(string day)
     {
-        app_detail->setappointmentDay(day);
+        appdetailPtr->setappointmentDay(day); 
     }
 
-    void setapp_detail(appointmentDetail* ap)
+    void setappdetailptr(appointmentDetail* ap)
     {
-        app_detail = ap;
+        appdetailPtr = ap; 
     }
 
-    appointmentDetail* getapp_detail()
+    appointmentDetail* getappdetailptr()
     {
-        return app_detail;    // returns the pointer of the appointment 
+        return appdetailPtr;    // returns the pointer of the appointment 
     }
     string getappointmentbyName()
     {
-        return app_detail->getappointmentbyName();
+        return appdetailPtr->getappointmentbyName();
     }
     string getappointmentbyId()
     {
-        return app_detail->getappointmentbyId();
+        return appdetailPtr->getappointmentbyId();
     }
     string getappointmenttoName()
     {
-        return app_detail->getappointmenttoName();
+        return appdetailPtr->getappointmenttoName();
     }
     string getappointmenttoId()
     {
-        return  app_detail->getappointmenttoId();
+        return  appdetailPtr->getappointmenttoId();
     }
     string getappointmentDay()
     {
-        return  app_detail->getappointmentDay();
+        return  appdetailPtr->getappointmentDay();
     }
 
     string getdoctorType()
@@ -305,86 +397,157 @@ public:
         return doctorSalary;
     }
     ~doctor()
+     { 
+        delete appdetailPtr;
+     } 
+};
+
+//medicine class
+class medicine
+{
+    string medicineType; 
+    int medicineQuantity; 
+    string medicineTime; 
+
+public : 
+    medicine()
     {
-		delete app_detail;
+        medicineType = "normal"; 
+        medicineQuantity = 0; 
+        medicineTime = " "; 
+    }
+
+    medicine(string type, int quantity, string time)
+    {
+        medicineType = type; 
+        medicineQuantity = quantity; 
+        medicineTime = time; 
+    }
+
+    medicine(medicine& m)
+    {
+        this->medicineType = m.medicineType; 
+        this->medicineQuantity = m.medicineQuantity; 
+        this->medicineTime = m.medicineTime; 
+    }
+
+    string getmedicineType()
+    {
+        return medicineType; 
+    }
+
+    string getmedicineTime()
+    {
+        return medicineTime; 
+    }
+    int getmedicineQuantity()
+    {
+        return medicineQuantity; 
+    }
+    void setmedicineType(string type)
+    {
+        medicineType = type; 
+    }
+    void setmedicineQuantity(int num)
+    {
+        medicineQuantity = num; 
+    }
+    void setmedicineTime(string time)
+    {
+        medicineTime = time; 
     }
 };
 
-class patient : public common_person
+// precription class
+class prescription 
 {
-    string patientType;
-    healthRecords record;
+    doctor * docPtr; 
+    patient Patient; 
+    int numberofmedicines; 
+    medicine* medicinePtr; 
 
-public:
+public : 
 
-    patient()
+    prescription()
     {
-        patientType = "General";
-    }
-
-    patient(string id, string name, int age, string type, string symptom, string diagnose) : common_person(id, name, age), patientType(type), record(symptom, diagnose)
-    {
-
-    }
-
-    patient(patient& p)
-    {
-        this->setcommonpersonID(p.getcommonpersonID());
-        this->setcommonpersonName(p.getcommonpersonName());
-        this->setcommonpersonAge(p.getcommonpersonAge());
-        this->patientType = p.patientType;
+        docPtr = NULL; 
+        numberofmedicines = 0; 
+        medicinePtr = NULL; 
     }
 
-    void setpatientType(string type)
+    prescription(doctor *d, patient p, int num)
     {
-        patientType = type;
+        docPtr = d; 
+        Patient = p; 
+        numberofmedicines = num; 
+        if (num > 0)
+        {
+            medicinePtr = new medicine[num];
+            fillMedicine(num);
+        }
+        else 
+            medicinePtr = NULL;
     }
 
-    void setSymptoms(string symptom)
-    {
-        record.setSymptoms(symptom);
-    }
-
-    void setDiagnosis(string diagnose)
-    {
-        record.setDiagnosis(diagnose);
-    }
-    void setRecord(healthRecords& h)
-    {
-        record = h;
-    }
-    healthRecords& getRecord()
-    {
-        return record;
-    }
-    string getSymptoms()
-    {
-        return record.getSymptoms();
-    }
-    string getDiagnosis()
-    {
-        return record.getDiagnosis();
-    }
-    string getpatientType()
-    {
-        return patientType;
-    }
 
     void display()
     {
-        cout << "Patient Information" << endl;
-        cout << "Patient name : " << this->getcommonpersonName() << endl;
-        cout << "patient id : " << this->getcommonpersonID() << endl;
-        cout << "Patient Age : " << this->getcommonpersonAge() << endl;
-        cout << "Patient Type : " << patientType << endl;
-        cout << "Pateint Health Record " << endl;
-        cout << "Patient Symptoms : " << getSymptoms() << endl;
-        cout << "Pateitn Diagnosis : " << getDiagnosis() << endl;
-
+        cout << "Medicine Prescription" << endl; 
+        if (docPtr != NULL)
+        {
+            cout << "Doctor name : " << this->docPtr->getcommonpersonName() << endl;
+            cout << "Doctor id : " << this->docPtr->getcommonpersonID() << endl;
+        }
+        else
+        {
+            cout << "No doctor assigned " << endl;
+        }
+            cout << "Patient name : " << this->Patient.getcommonpersonName() << endl;
+            cout << "Patient id : " << this->Patient.getcommonpersonID() << endl;
+            cout << "Patient Age : " << this->Patient.getcommonpersonAge() << endl;
+            cout << "Patient Diagnosis : " << this->Patient.getDiagnosis() << endl;
+            if ( medicinePtr != NULL)
+            {
+                for (int i = 0; i < numberofmedicines; i++)
+                {
+                    cout << "Medicine : " << i+1 << endl;
+                    cout << "Medicine Type : " << medicinePtr[i].getmedicineType() << endl;
+                    cout << "Medicine Quantity : " << medicinePtr[i].getmedicineQuantity() << endl;
+                    cout << "Medicine Time : " << medicinePtr[i].getmedicineTime() << endl;
+                }
+           
+            }
+            else
+                cout << "No Medicine assigned " << endl;
+           
     }
 
+    void fillMedicine(int num )
+    {
+        int bufferint; 
+        string bufferstring; 
+        for (int i = 0; i < num; i++)
+        {
+            cout << "Enter medicine : " << i << endl; 
+            cout << "Enter medicine Type : "; 
+            cin >> bufferstring; 
+            medicinePtr[i].setmedicineType(bufferstring); 
+            cout << "Enter medicine quantity : ";
+            cin >> bufferint;
+            medicinePtr[i].setmedicineQuantity(bufferint);
+            cout << "Enter medicine Time: ";
+            cin >> bufferstring;
+            medicinePtr[i].setmedicineTime(bufferstring);
+        }
+    }
 
+    ~prescription()
+    {
+        delete[] medicinePtr;
+    }
 };
+
+//room class
 class Room {
 protected:
     int roomNumber;
@@ -462,6 +625,8 @@ public:
     }
 
 };
+
+//room type
 class ICURoom : public Room {
     const int capacity = 30;
     bool hasVentilator;
@@ -498,6 +663,8 @@ public:
         }
     }
 };
+
+//room type
 class GeneralRoom : public Room {
 private:
     const int capacity = 50;
@@ -528,6 +695,8 @@ public:
     }
 
 };
+
+//room type
 class EmergencyRoom : public Room {
 private:
     const int capacity = 10;
@@ -558,147 +727,8 @@ public:
     }
 
 };
-class medicine
-{
-    string medicineType;
-    int medicineQuantity;
-    string medicineTime;
 
-public:
-    medicine()
-    {
-        medicineType = "normal";
-        medicineQuantity = 0;
-        medicineTime = " ";
-    }
-
-    medicine(string type, int quantity, string time)
-    {
-        medicineType = type;
-        medicineQuantity = quantity;
-        medicineTime = time;
-    }
-
-    medicine(medicine& m)
-    {
-        this->medicineType = m.medicineType;
-        this->medicineQuantity = m.medicineQuantity;
-        this->medicineTime = m.medicineTime;
-    }
-
-    string getmedicineType()
-    {
-        return medicineType;
-    }
-
-    string getmedicineTime()
-    {
-        return medicineTime;
-    }
-    int getmedicineQuantity()
-    {
-        return medicineQuantity;
-    }
-    void setmedicineType(string type)
-    {
-        medicineType = type;
-    }
-    void setmedicineQuantity(int num)
-    {
-        medicineQuantity = num;
-    }
-    void setmedicineTime(string time)
-    {
-        medicineTime = time;
-    }
-};
-class prescription
-{
-    doctor* docPtr;
-    patient Patient;
-    int numberofmedicines;
-    medicine* medicinePtr;
-
-public:
-
-    prescription()
-    {
-        docPtr = NULL;
-        numberofmedicines = 0;
-        medicinePtr = NULL;
-    }
-
-    prescription(doctor* d, patient p, int num)
-    {
-        docPtr = d;
-        Patient = p;
-        numberofmedicines = num;
-        if (num > 0)
-        {
-            medicinePtr = new medicine[num];
-            fillMedicine(num);
-        }
-        else
-            medicinePtr = NULL;
-    }
-
-
-    void display()
-    {
-        cout << "Medicine Prescription" << endl;
-        if (docPtr != NULL)
-        {
-            cout << "Doctor name : " << this->docPtr->getcommonpersonName() << endl;
-            cout << "Doctor id : " << this->docPtr->getcommonpersonID() << endl;
-        }
-        else
-        {
-            cout << "No doctor assigned " << endl;
-        }
-        cout << "Patient name : " << this->Patient.getcommonpersonName() << endl;
-        cout << "Patient id : " << this->Patient.getcommonpersonID() << endl;
-        cout << "Patient Age : " << this->Patient.getcommonpersonAge() << endl;
-        cout << "Patient Diagnosis : " << this->Patient.getDiagnosis() << endl;
-        if (medicinePtr != NULL)
-        {
-            for (int i = 0; i < numberofmedicines; i++)
-            {
-                cout << "Medicine : " << i + 1 << endl;
-                cout << "Medicine Type : " << medicinePtr[i].getmedicineType() << endl;
-                cout << "Medicine Quantity : " << medicinePtr[i].getmedicineQuantity() << endl;
-                cout << "Medicine Time : " << medicinePtr[i].getmedicineTime() << endl;
-            }
-
-        }
-        else
-            cout << "No Medicine assigned " << endl;
-
-    }
-
-    void fillMedicine(int num)
-    {
-        int bufferint;
-        string bufferstring;
-        for (int i = 0; i < num; i++)
-        {
-            cout << "Enter medicine : " << i << endl;
-            cout << "Enter medicine Type : ";
-            cin >> bufferstring;
-            medicinePtr[i].setmedicineType(bufferstring);
-            cout << "Enter medicine quantity : ";
-            cin >> bufferint;
-            medicinePtr[i].setmedicineQuantity(bufferint);
-            cout << "Enter medicine Time: ";
-            cin >> bufferstring;
-            medicinePtr[i].setmedicineTime(bufferstring);
-        }
-    }
-
-    ~prescription()
-    {
-        delete[] medicinePtr;
-    }
-};
+//appointment scheduling class
 class appointmentScheduling {
     string appointmentDate;
     string appointmentTime;
@@ -717,11 +747,12 @@ public:
         selectedDoctor = NULL;
     }
 
+    // Function updated to use aggregation (passing patient and doctor array)
     void scheduleAppointment(patient& p, doctor Doctors[], int s) {
         cout << "Welcome: " << p.getcommonpersonName() << endl;
         cout << "Please book your appointment" << endl;
         cout << "Select doctor specialization: " << endl;
-        cout << "1. General" << endl << "2. Surgeon" << endl << "3. Cardiologist" << endl;
+        cout << "1. General\n2. Surgeon\n3. Cardiologist" << endl;
 
         int choice;
         cout << "Enter your choice: ";
@@ -752,6 +783,7 @@ public:
                 cout << "  " << Doctors[i].getcommonpersonName() << "  " << Doctors[i].getdoctorStatus() << " " << Doctors[i].getdoctorType() << " " << endl;
             }
         }
+        scheduleByname(p , Doctors , s);
     }
 
     void scheduleByname(patient& p, doctor Doctors[], int s) {
@@ -760,6 +792,9 @@ public:
         cout << "Enter doctor name to schedule appointment: ";
         string name;
         cin >> name;
+        cout << "Enter day of appointment:"; 
+        string day; 
+        cin >> day; 
 
         for (int i = 0; i < s; i++) {
             if (Doctors[i].getcommonpersonName() == name)
@@ -768,20 +803,21 @@ public:
                 {
                     Doctors[i].setdoctorStatus("busy");
                     Doctors[i].setappointmentStatus(true);
-                    if (Doctors[i].getapp_detail() == NULL) {
-                        Doctors[i].setapp_detail(new appointmentDetail());
+                    if (Doctors[i].getappdetailptr() == NULL) {
+                        Doctors[i].setappdetailptr(new appointmentDetail());
                     }
                     Doctors[i].setappointmentbyName(p.getcommonpersonName());
                     Doctors[i].setappointmentbyId(p.getcommonpersonID());
                     Doctors[i].setappointmenttoName(Doctors[i].getcommonpersonName());
                     Doctors[i].setappointmenttoId(Doctors[i].getcommonpersonID());
-                    Doctors[i].setappointmentDay("Monday");
+                    Doctors[i].setappointmentDay(day); //this is based on user input
 
                     this->selectedDoctor = &Doctors[i];
                     this->ifBooked = true;
                     this->doctorSpecialization = Doctors[i].getdoctorType();
 
                     cout << "Appointment booked successfully with Dr. " << Doctors[i].getcommonpersonName() << endl;
+                    successfulAppointment(); 
                     return;
                 }
                 else {
@@ -807,6 +843,8 @@ public:
         }
     }
 };
+
+//functions for admin portal 
 void addDoctor(doctor*& Doctors, int& s, int& cap) {
     if (s >= cap) {
         cap = cap + 3;
@@ -1026,7 +1064,7 @@ void editSalary(doctor Doctors[], int s) {
 }
 
 
-void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &cap) {
+void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[],int room_c, appointmentScheduling& scheduler, int &ds,int &ps,int &dcap, int &pcap) {
     cout << "Welcome to the Admin Portal" << endl;
     cout << "1. Add Doctor" << endl;
     cout << "2. View Doctors" << endl;
@@ -1042,27 +1080,27 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
     cin >> choice;
     if (choice == 1) {
         cout << "Adding a new doctor" << endl;
-        addDoctor(Doctors, s, cap);
+        addDoctor(Doctors, ds, dcap);
     }
     else if (choice == 2)
     {
         cout << "Viewing all doctors" << endl;
-        viewDoctors(Doctors, s);
+        viewDoctors(Doctors, ds);
     }
     else if (choice == 3)
     {
         cout << "Removing a doctor" << endl;
-        removeDoctor(Doctors, s);
+        removeDoctor(Doctors, ds);
     }
     else if (choice == 4)
     {
         cout << "Viewing patient details" << endl;
-        seePatientDetails(Patients, s);
+        seePatientDetails(Patients, ps);
     }
     else if (choice == 5)
     {
         cout << "Viewing room details" << endl;
-        seeRoomDetails(rooms, s);
+        seeRoomDetails(rooms, room_c);
     }
     else if (choice == 6)
     {
@@ -1084,23 +1122,23 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
         cin >> Choice;
         if (Choice == 1)
         {
-            editSpecialization(Doctors, s);
+            editSpecialization(Doctors, ds);
         }
         else if (Choice == 2)
         {
-            editStatus(Doctors, s);
+            editStatus(Doctors, ds);
         }
         else if (Choice == 3)
         {
-            editFee(Doctors, s);
+            editFee(Doctors, ds);
         }
         else if (Choice == 4)
         {
-            editSalary(Doctors, s);
+            editSalary(Doctors, ds);
         }
         else if (Choice == 5)
         {
-            editDoctorDetails(Doctors, s);
+            editDoctorDetails(Doctors, ds);
         }
         else if (Choice == 6)
         {
@@ -1114,7 +1152,7 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmen
     else if (choice == 8)
     {
         cout << "Editing patient details" << endl;
-        editPatientDetails(Patients, s);
+        editPatientDetails(Patients,ps);
     }
     else
     {
@@ -1274,7 +1312,7 @@ void applyLeave(doctor Doctors[], int s) {
     }
     cout << "Doctor not found." << endl;
 }
-void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &s, int &capa) {
+void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &doc_s,int &pat_s, int &doc_capa, int &pat_capa) {
     cout << "Welcome to the Doctor Portal" << endl;
     int choice = 0;
     while (choice != 10) {
@@ -1294,32 +1332,32 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
         switch (choice)
         {
         case 1:
-            viewAllpatients(Patients, s);
+            viewAllpatients(Patients, pat_s);
             break;
         case 2:
-            viewHealthRecord(Patients, s);
+            viewHealthRecord(Patients, pat_s);
             break;
         case 3:
-            viewPrescription(Patients, s);
+            viewPrescription(Patients, pat_s);
             break;
         case 4:
-            setStatus(Doctors, s);
+            setStatus(Doctors, doc_s);
             break;
         case 5:
-            setFee(Doctors, s);
+            setFee(Doctors, doc_s);
             break;
         case 6:
             seeAppointments(scheduler);
             break;
 
         case 7:
-            addPatient(Patients, s, capa);
+            addPatient(Patients, pat_s, pat_capa);
             break;
         case 8:
-            removePatient(Patients, s);
+            removePatient(Patients, pat_s);
             break;
         case 9:
-            applyLeave(Doctors, s);
+            applyLeave(Doctors, doc_s);
             break;
         default:
             cout << "work" << endl;
@@ -1327,6 +1365,426 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
     }
     cout << "Thanks you for visiting..." << endl;
 }
-int main() {
+
+void patientPortal()
+{
+    int choice = 0 ; 
+    while (choice != 8)
+    {
+        cout << "----------------Welcome To The Patient Portal----------------------" << endl;
+        cout << "Press key to perform task " << endl;
+        cout << "1. View all Doctors" << endl; // done 
+        cout << "2. Book an appointment" << endl; // done 
+        cout << "3. View Health Record" << endl; // done 
+        cout << "4. View Pescription" << endl;
+        cout << "5. Buy Medicine" << endl;
+        cout << "6. Fill a complain" << endl;
+        cout << "7. Fill a suggestion" << endl;
+        cout << "8. Exit" << endl;
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+
+           // viewDoctors(d, doctorSize); 
+            break; 
+        case 2:
+            //as->scheduleAppointment( p , d , doctorSize); 
+            break; 
+        case 3:
+          //  p.getRecord(); 
+            break; 
+        case 4:
+            // prescription 
+            break; 
+        case 5:
+            //pharmacy integration 
+            break; 
+        case 6:
+            // after maing admin class
+            break; 
+        case 7:
+            //after making class 
+            break; 
+
+        default : 
+            cout << "work" << endl; 
+        }
+    }
+    
+    cout << "Thanks you for visiting..." << endl; 
+}
+
+bool passwordChecker(string pass)
+{
+    if (pass.length() <= 10)
+    {
+        return true;
+    }
+    else
+        return false; 
+}
+bool idsizeChecker(string id)
+{
+    if (id.length() == 4)
+        return true;
+    else
+        return false;
+}
+bool idVerifier(string checkingID, string file)
+{
+    bool uniqueID = true; 
+    string fileID; 
+    string word; 
+    string filename; 
+   
+    filename = file; 
+    ifstream infile(filename);
+    if (!infile)
+    {
+        cout << "Cannot Open File" << endl;
+    }
+    while (getline(infile, word))
+    {
+
+        int positionofComma = word.find(',');
+        if (positionofComma == string::npos)
+        {
+            continue;
+        }
+        else
+        {
+            fileID = word.substr(0, positionofComma);
+            if (fileID == checkingID)
+            {
+                uniqueID = false; 
+                break; 
+            }
+        }
+
+    }
+
+    if (!uniqueID)
+    {
+        return false; 
+    }
+    else
+    {
+        return true; 
+    }
+}
+
+//registration portal 
+bool registrationportal(string name , string file)
+{
+    string loginID, loginPass; 
+    string fileID, filePass; 
+    int choice = 0 ;
+    string filename; 
+    string word; 
+    bool idValidation = false;
+    bool passValidation = false; 
+    bool formatValidation = true; 
+    cout << "-----" << name << " registration-----" << endl;
+    while (choice != 3)
+    {
+        cout << "Enter your choice to continue" << endl;
+        cout << "1. Login" << endl;
+        cout << "2. Sign Up" << endl;
+        cout << "3. Exit" << endl;
+        cin >> choice;
+        if (choice == 1)
+        {
+            idValidation = false;
+            passValidation = false;
+            cout << "Enter your id :"; 
+            cin >> loginID; 
+            cout << "Enter your password :"; 
+            cin >> loginPass; 
+            filename = file; 
+            ifstream infile(filename); 
+                if (!infile)
+                {
+                    cout << "Cannot Open File" << endl; 
+                }
+                while (getline(infile, word)) // infile.eof()
+                {
+                    
+                    int positionofComma = word.find(',');
+                    if (positionofComma == string::npos)
+                    {
+                        continue; 
+                    }
+                    else
+                    {
+                        fileID = word.substr(0, positionofComma);
+                        filePass = word.substr(positionofComma + 1);
+                        if (fileID == loginID)
+                        {
+                            idValidation = true;
+                            if (filePass == loginPass)
+                            {
+                                passValidation = true;
+                                break;
+                            }
+                            else
+                                passValidation = false; 
+                        }
+                    }
+                    
+                }
+               
+                if (!idValidation)
+                {
+                    cout << "Invalid User ID...Re-enter or Sign Up to continue" << endl; 
+                }
+                if (!passValidation && idValidation)
+                {
+                    cout << "Invalid Password...Try Again" << endl;
+                }
+            
+                infile.close(); 
+
+                if (passValidation && idValidation)
+                {
+                    return true;   
+                }
+            
+
+        }
+        else if (choice == 2)
+        {
+            bool registrationSuccessful = false; 
+            string userID; 
+            string userPass; 
+            bool isuserpassValid = false; 
+            bool isuseridsizeValid = false; 
+            bool isuseridUnique = false; 
+            cout << "Enter 4 digit ID : " ; 
+            cin >> userID; 
+            isuseridsizeValid = idsizeChecker(userID); 
+            if (isuseridsizeValid)
+            {
+
+                isuseridUnique = idVerifier(userID, file);
+                if (!isuseridUnique)
+                {
+                    cout << "Id is already taken...Try again" << endl;
+                }
+                else
+                {
+                    cout << "Enter Password (max size 10 ) : " ;
+                    cin >> userPass;
+                    isuserpassValid = passwordChecker(userPass);
+                    if (isuserpassValid)
+                    {
+                        filename = file;
+                        ofstream outfile(filename, ios::app);
+                        if (!outfile)
+                        {
+                            cout << "Error opening file" << endl;
+                        }
+                        outfile << endl << userID << "," << userPass;
+
+                        outfile.close();
+                        cout << "User added successfully" << endl; //create object with information 
+                        // patientsdata.txt
+                        // doctordata.txt
+                        registrationSuccessful = true;
+                        cout << "Log in to continue" << endl;
+                        
+                    }
+                    else
+                        cout << "Invalid Pass...Try Again" << endl;
+                }
+
+            }
+            else
+                cout << "Invalid ID size...Try again" << endl; 
+           
+        }
+        else if (choice != 3)
+        {
+            cout << "Invalid Choice...Enter Again " << endl;
+        }
+    }
+    cout << "Thank you for visiting" << endl; 
+    return false; 
 
 }
+
+//bootup 
+void bootup(doctor * & docPtr , patient * & patPtr , int & docSize , int & patSize  )
+{
+    int loopController = 0; 
+    string dummy; 
+    ifstream infilecountingdoc("doctor.txt");
+    if (!infilecountingdoc)
+    {
+        cout << "Cannot open file" << endl; 
+    }
+    while (getline(infilecountingdoc ,dummy))
+    {
+        docSize++; 
+    }
+    infilecountingdoc.close(); 
+    docPtr = new doctor[docSize]; 
+    ifstream infilecountingpatient("patient.txt");
+    if (!infilecountingpatient)
+    {
+        cout << "Cannot open file" << endl;
+    }
+
+    while (getline(infilecountingpatient, dummy))
+    {
+        patSize++;
+    }
+    infilecountingpatient.close();
+    patPtr = new patient[patSize]; 
+    // doctor 
+    ifstream doctorfile("doctor.txt"); 
+    if (!doctorfile)
+    {
+        cout << "Cannot open file" << endl; 
+    }
+    while (getline(doctorfile, dummy) && loopController < docSize)
+    {
+        
+       
+        int pos;
+        pos = dummy.find(',');
+        string name = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string id = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        int age = stoi(dummy.substr(0, pos));
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string status = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string type = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        int fee = stoi(dummy.substr(0, pos));
+        dummy = dummy.substr(pos + 1);
+        int salary = stoi(dummy);
+        docPtr[loopController].setcommonpersonName(name); 
+        docPtr[loopController].setcommonpersonID(id); 
+        docPtr[loopController].setcommonpersonAge(age);
+        docPtr[loopController].setdoctorType(type);
+        docPtr[loopController].setdoctorStatus(status); 
+        docPtr[loopController].setdoctorFee(fee); 
+        docPtr[loopController].setdoctorSalary(salary); 
+        loopController++; 
+
+    }
+    doctorfile.close(); 
+
+    //patient
+    ifstream patientfile("patient.txt");
+    if (!patientfile)
+    {
+        cout << "Cannot open file" << endl;
+    }
+    dummy = " "; 
+    loopController = 0; 
+    while (getline(patientfile, dummy) && loopController < patSize)
+    {
+       
+        int pos;
+        pos = dummy.find(',');
+        string id = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string name = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        int age = stoi(dummy.substr(0, pos));
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string type = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        pos = dummy.find(',');
+        string symptom = dummy.substr(0, pos);
+        dummy = dummy.substr(pos + 1);
+        string diagnosis = dummy;
+        patPtr[loopController].setcommonpersonName(name);
+        patPtr[loopController].setcommonpersonID(id);
+        patPtr[loopController].setcommonpersonAge(age);
+        patPtr[loopController].setpatientType(type); 
+        patPtr[loopController].setSymptoms(symptom);
+        patPtr[loopController].setDiagnosis(diagnosis);
+        loopController++;
+
+    }
+    patientfile.close();
+
+
+    
+
+    
+
+}
+
+//main
+int main()
+{
+    doctor* doctorPtr; 
+    patient* patientPtr; 
+    int doctorSize = 0 ; 
+    int patientSize = 0 ; 
+    bool registrationVerifier = false; 
+    // bootup( doctorPtr , patientPtr , doctorSize , patientSize); 
+    cout << "-----Welcome to the Hospital Managment System------" << endl; 
+    int choice = 0 ; 
+    while ( choice != 4)
+    {
+       
+        cout << "Enter your Portal number to continue" << endl;
+        cout << "1. Admin Portal" << endl;
+        cout << "2. Doctor Portal" << endl;
+        cout << "3. Patient Portal" << endl;
+        cout << "4. Exit" << endl;
+        cin >> choice;
+        if (choice == 1)
+        {
+           registrationVerifier =  registrationportal("Admin", "AdminPasswords.txt"); 
+           if (registrationVerifier)
+           {
+               cout << "admin works "; 
+               //adminPortal();
+           }
+           else
+               cout << "Registration Failed" << endl; 
+        }
+        else if (choice == 2)
+        {
+            registrationVerifier = registrationportal("Doctor", "DoctorPasswords.txt");
+            if (registrationVerifier)
+            {
+                //doctorPortal();
+            }
+            else
+                cout << "Registration Failed" << endl;
+            
+        }
+        else if (choice == 3)
+        {
+            registrationVerifier = registrationportal("Patient", "PatientPasswords.txt");
+            if (registrationVerifier)
+            {
+                patientPortal();
+            }
+            else
+                cout << "Registration Failed" << endl;
+           
+        }
+        else if (choice != 4)
+            cout << "Invalid Choice...Enter Again " << endl; 
+    }
+    cout << "Thank you for visiting" << endl; 
+
+} 
