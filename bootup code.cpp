@@ -196,6 +196,7 @@ public :
         this->setcommonpersonName(p.getcommonpersonName());
         this->setcommonpersonAge(p.getcommonpersonAge()); 
         this->patientType = p.patientType; 
+        this->record = p.record;  
     }
 
     void setpatientType(string type)
@@ -283,18 +284,23 @@ public:
 
     }
 
-    doctor(doctor& d)
+    
+doctor(doctor& d) {
+    this->setcommonpersonID(d.getcommonpersonID());
+    this->setcommonpersonName(d.getcommonpersonName());
+    this->setcommonpersonAge(d.getcommonpersonAge());
+    this->doctorType       = d.doctorType;
+    this->doctorStatus     = d.doctorStatus;
+    this->doctorFee        = d.doctorFee;
+    this->doctorSalary     = d.doctorSalary;
+    this->appointmentStatus = d.appointmentStatus;
+    if (d.appdetailPtr != NULL)
     {
-        this->setcommonpersonID(d.getcommonpersonID());
-        this->setcommonpersonName(d.getcommonpersonName());
-        this->setcommonpersonAge(d.getcommonpersonAge());
-        this->doctorType = d.doctorType;
-        this->doctorStatus = d.doctorStatus;
-        this->doctorFee = d.doctorFee;
-        this->doctorSalary = d.doctorSalary;
-        this->appointmentStatus = d.appointmentStatus; 
-        this->appdetailPtr = d.appdetailPtr; 
+        this->appdetailPtr = new appointmentDetail(*d.appdetailPtr);
     }
+    else
+        this->appdetailPtr = NULL;
+}
 
     void setdoctorType(string type)
     {
@@ -390,6 +396,10 @@ public:
     {
         return doctorSalary;
     }
+    ~doctor()
+     { 
+        delete appdetailPtr;
+     } 
 };
 
 //medicine class
@@ -835,26 +845,51 @@ public:
 };
 
 //functions for admin portal 
-void addDoctor(doctor Doctors[], int& s) {
-    cout << "Enter doctor details to add:" << endl;
-    string id, name, type;
-    int age, fee, salary;
-    cout << "ID: ";
-    cin >> id;
-    cout << "Name: ";
-    cin >> name;
-    cout << "Age: ";
-    cin >> age;
-    cout << "Specialization (General/Surgeon/Cardiologist): ";
-    cin >> type;
-    cout << "Fee: ";
-    cin >> fee;
-    cout << "Salary: ";
-    cin >> salary;
-    doctor newDoctor(id, name, age, type, "free", fee, salary, false, NULL);
-    Doctors[s] = newDoctor;
-    s++;
-    cout << "Doctor " << name << " added successfully." << endl;
+void addDoctor(doctor*& Doctors, int& s, int& cap) {
+    if (s >= cap) {
+        cap = cap + 3;
+        doctor* newArr = new doctor[cap];
+        for (int i = 0; i < s; i++) {
+            newArr[i] = Doctors[i];
+        }
+        delete[] Doctors;
+        Doctors = newArr;
+    }
+    ofstream outFile("doctors.txt", ios::app);
+    if (!outFile) {
+        cout << "Error opening file." << endl;
+        return;
+    }
+    else
+    {
+        cout << "Enter doctor ID: ";
+        string id;
+        cin >> id;
+        cout << "Enter doctor name: ";
+        string name;
+        cin >> name;
+        cout << "Enter doctor age: ";
+        int age;
+        cin >> age;
+        cout << "Enter doctor specialization: ";
+        string type;
+        cin >> type;
+        cout << "Enter doctor status: ";
+        string status;
+        cin >> status;
+        cout << "Enter doctor fee: ";
+        int fee;
+        cin >> fee;
+        cout << "Enter doctor salary: ";
+        int salary;
+        cin >> salary;
+        Doctors[s] = doctor(id, name, age, type, status, fee, salary, false, NULL);
+        outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Fee: " << fee << ", Salary: " << salary << endl;
+        s++;
+        outFile.close();
+
+    }
+
 }
 void viewDoctors(doctor Doctors[], int s)
 {
@@ -864,22 +899,30 @@ void viewDoctors(doctor Doctors[], int s)
     }
 }
 void removeDoctor(doctor Doctors[], int& s) {
-    cout << "Enter doctor name to remove: ";
-    string name;
-    cin >> name;
+    cout << "Enter doctor ID to remove: ";
+    string id;
+    cin >> id;
 
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (Doctors[i].getcommonpersonID() == id) {
             for (int j = i; j < s - 1; j++) {
                 Doctors[j] = Doctors[j + 1];
             }
             s--;
-            cout << "Doctor " << name << " removed successfully." << endl;
+            ofstream outFile("doctors.txt");
+            if (outFile) {
+                for (int k = 0; k < s; k++) {
+                    outFile << "Name: " << Doctors[k].getcommonpersonName() << " ID: " << Doctors[k].getcommonpersonID() << " Age: " << Doctors[k].getcommonpersonAge() << " Type: " << Doctors[k].getdoctorType() << " Fee: " << Doctors[k].getdoctorFee() << " Salary: " << Doctors[k].getdoctorSalary() << endl;
+                }
+                outFile.close();
+            }
+            cout << "Doctor removed successfully." << endl;
             return;
         }
     }
     cout << "Doctor not found." << endl;
 }
+
 void seePatientDetails(patient Patients[], int s) {
     cout << "List of Patients:" << endl;
     for (int i = 0; i < s; i++) {
@@ -1020,7 +1063,102 @@ void editSalary(doctor Doctors[], int s) {
     cout << "Doctor not found." << endl;
 }
 
-//functions for doctor portal 
+
+void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[],int room_c, appointmentScheduling& scheduler, int &ds,int &ps,int &dcap, int &pcap) {
+    cout << "Welcome to the Admin Portal" << endl;
+    cout << "1. Add Doctor" << endl;
+    cout << "2. View Doctors" << endl;
+    cout << "3. Remove Doctor" << endl;
+    cout << "4. see patient details" << endl;
+    cout << "5. see room details" << endl;
+    cout << "6. see appointment details" << endl;
+    cout << "7. edit doctor details" << endl;
+    cout << "8. edit patient details" << endl;
+    cout << "9. exit" << endl;
+    int choice;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    if (choice == 1) {
+        cout << "Adding a new doctor" << endl;
+        addDoctor(Doctors, ds, dcap);
+    }
+    else if (choice == 2)
+    {
+        cout << "Viewing all doctors" << endl;
+        viewDoctors(Doctors, ds);
+    }
+    else if (choice == 3)
+    {
+        cout << "Removing a doctor" << endl;
+        removeDoctor(Doctors, ds);
+    }
+    else if (choice == 4)
+    {
+        cout << "Viewing patient details" << endl;
+        seePatientDetails(Patients, ps);
+    }
+    else if (choice == 5)
+    {
+        cout << "Viewing room details" << endl;
+        seeRoomDetails(rooms, room_c);
+    }
+    else if (choice == 6)
+    {
+        cout << "Viewing appointment details" << endl;
+        seeAppointmentDetails(scheduler);
+    }
+    else if (choice == 7)
+    {
+        cout << "Editing doctor details" << endl;
+        cout << "What details do you want to edit?" << endl;
+        cout << "1. Specialization" << endl;
+        cout << "2. Status" << endl;
+        cout << "3. Fee" << endl;
+        cout << "4. Salary" << endl;
+        cout << "5. All details" << endl;
+        cout << "6.Exit" << endl;
+        cout << "Enter your choice: ";
+        int Choice;
+        cin >> Choice;
+        if (Choice == 1)
+        {
+            editSpecialization(Doctors, ds);
+        }
+        else if (Choice == 2)
+        {
+            editStatus(Doctors, ds);
+        }
+        else if (Choice == 3)
+        {
+            editFee(Doctors, ds);
+        }
+        else if (Choice == 4)
+        {
+            editSalary(Doctors, ds);
+        }
+        else if (Choice == 5)
+        {
+            editDoctorDetails(Doctors, ds);
+        }
+        else if (Choice == 6)
+        {
+            cout << "Exiting doctor details editing" << endl;
+        }
+        else
+        {
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+    else if (choice == 8)
+    {
+        cout << "Editing patient details" << endl;
+        editPatientDetails(Patients,ps);
+    }
+    else
+    {
+        cout << "Invalid choice. Please try again." << endl;
+    }
+}
 void viewAllpatients(patient Patients[], int s) {
     cout << "List of Patients:" << endl;
     for (int i = 0; i < s; i++) {
@@ -1099,30 +1237,49 @@ void seeAppointments(appointmentScheduling& scheduler) {
     cout << "Viewing appointments" << endl;
     scheduler.successfulAppointment();
 }
-void addPatient(patient Patients[], int& s) {
-    cout << "Enter patient ID" << endl;
-    string id;
-    cin >> id;
-    cout << "Enter patient symptoms" << endl;
-    string symptom;
-    cin >> symptom;
-    cout << "Enter the patient diagnosis" << endl;
-    string diagnose;
-    cin >> diagnose;
-    cout << "Enter patient name: ";
-    string name;
-    cin >> name;
-    cout << "Enter patient age: ";
-    int age;
-    cin >> age;
-    cout << "Enter patient type: ";
-    string type;
-    cin >> type;
+void addPatient(patient*& Patients, int& s, int& capa) {
+    if (s >= capa) {
+        capa = capa + 3;
+        patient* newArr = new patient[capa];
+        for (int i = 0; i < s; i++) {
+            newArr[i] = Patients[i];
+        }
+        delete[] Patients;
+        Patients = newArr;
+    }
+    ofstream outFile("patients.txt", ios::app);
+    if (!outFile) {
+        cout << "Error opening file." << endl;
+        return;
+    }
+    else
+    {
+        cout << "Enter patient ID" << endl;
+        string id;
+        cin >> id;
+        cout << "Enter patient symptoms" << endl;
+        string symptom;
+        cin >> symptom;
+        cout << "Enter the patient diagnosis" << endl;
+        string diagnose;
+        cin >> diagnose;
+        cout << "Enter patient name: ";
+        string name;
+        cin >> name;
+        cout << "Enter patient age: ";
+        int age;
+        cin >> age;
+        cout << "Enter patient type: ";
+        string type;
+        cin >> type;
 
-    Patients[s] = patient(id, name, age, type, symptom, diagnose);
-    s++;
+        Patients[s] = patient(id, name, age, type, symptom, diagnose);
+        outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Symptoms: " << symptom << ", Diagnosis: " << diagnose << endl;
+        s++;
+        outFile.close();
+    }
 }
-void removePatient(patient Patients[], int& s) {
+void removePatient(patient*& Patients, int& s) {
     cout << "Enter patient name to remove: ";
     string name;
     cin >> name;
@@ -1155,11 +1312,60 @@ void applyLeave(doctor Doctors[], int s) {
     }
     cout << "Doctor not found." << endl;
 }
+void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int &doc_s,int &pat_s, int &doc_capa, int &pat_capa) {
+    cout << "Welcome to the Doctor Portal" << endl;
+    int choice = 0;
+    while (choice != 10) {
+        cout << "Press key to perform task " << endl;
+        cout << "1. View all Patients" << endl;
+        cout << "2. View Patient's Health Record" << endl;
+        cout << "3. View Patient's Prescription" << endl;
+        cout << "4. Set your Status" << endl;
+        cout << "5. Set your Fee" << endl;
+        cout << "6. See your appointments" << endl;
+        cout << "7. Add Patient" << endl;
+        cout << "8. Remove Patient" << endl;
+        cout << "9. Apply for Leave" << endl;
+        cout << "10. exit " << endl;
+        cin >> choice;
 
-//functions for pateint portal 
+        switch (choice)
+        {
+        case 1:
+            viewAllpatients(Patients, pat_s);
+            break;
+        case 2:
+            viewHealthRecord(Patients, pat_s);
+            break;
+        case 3:
+            viewPrescription(Patients, pat_s);
+            break;
+        case 4:
+            setStatus(Doctors, doc_s);
+            break;
+        case 5:
+            setFee(Doctors, doc_s);
+            break;
+        case 6:
+            seeAppointments(scheduler);
+            break;
 
+        case 7:
+            addPatient(Patients, pat_s, pat_capa);
+            break;
+        case 8:
+            removePatient(Patients, pat_s);
+            break;
+        case 9:
+            applyLeave(Doctors, doc_s);
+            break;
+        default:
+            cout << "work" << endl;
+        }
+    }
+    cout << "Thanks you for visiting..." << endl;
+}
 
-//pateint portal 
 void patientPortal()
 {
     int choice = 0 ; 
@@ -1209,150 +1415,6 @@ void patientPortal()
     cout << "Thanks you for visiting..." << endl; 
 }
 
-//doctor portal 
-void doctorPortal()
-{
-    int choice = 0;
-    while (choice != 10)
-    {
-        cout << "----------------Welcome To The Doctor Portal----------------------" << endl;
-        cout << "Press key to perform task " << endl;
-        cout << "1. View all Patients" << endl;
-        cout << "2. View Pateint's Health Record" << endl;
-        cout << "3. View  Patient's Pescription" << endl;
-        cout << "4. Set your Status" << endl;
-        cout << "5. Set your Fee" << endl;
-        cout << "6. See your appointments" << endl;
-        cout << "7. Add Patient" << endl;
-        cout << "8. Remove Patient" << endl;
-        cout << "9. Apply for Leave" << endl;
-        cout << "10. exit " << endl; 
-       
-        cin >> choice;
-        switch (choice)
-        {
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            break;
-        case 6:
-            break;
-        case 7:
-            break;
-
-        default:
-            cout << "work" << endl;
-        }
-    }
-
-    cout << "Thanks you for visiting..." << endl;
-}
-
-//admin portal 
-void adminPortal(doctor Doctors[], patient Patients[], Room* rooms[], appointmentScheduling& scheduler, int s) {
-    cout << "Welcome to the Admin Portal" << endl;
-    cout << "1. Add Doctor" << endl;
-    cout << "2. View Doctors" << endl;
-    cout << "3. Remove Doctor" << endl;
-    cout << "4. see patient details" << endl;
-    cout << "5. see room details" << endl;
-    cout << "6. see appointment details" << endl;
-    cout << "7. edit doctor details" << endl;
-    cout << "8. edit patient details" << endl;
-    cout << "9. exit" << endl;
-    int choice;
-    cout << "Enter your choice: ";
-    cin >> choice;
-    if (choice == 1) {
-        cout << "Adding a new doctor" << endl;
-        addDoctor(Doctors, s);
-    }
-    else if (choice == 2)
-    {
-        cout << "Viewing all doctors" << endl;
-        viewDoctors(Doctors, s);
-    }
-    else if (choice == 3)
-    {
-        cout << "Removing a doctor" << endl;
-        removeDoctor(Doctors, s);
-    }
-    else if (choice == 4)
-    {
-        cout << "Viewing patient details" << endl;
-        seePatientDetails(Patients, s);
-    }
-    else if (choice == 5)
-    {
-        cout << "Viewing room details" << endl;
-        seeRoomDetails(rooms, s);
-    }
-    else if (choice == 6)
-    {
-        cout << "Viewing appointment details" << endl;
-        seeAppointmentDetails(scheduler);
-    }
-    else if (choice == 7)
-    {
-        cout << "Editing doctor details" << endl;
-        cout << "What details do you want to edit?" << endl;
-        cout << "1. Specialization" << endl;
-        cout << "2. Status" << endl;
-        cout << "3. Fee" << endl;
-        cout << "4. Salary" << endl;
-        cout << "5. All details" << endl;
-        cout << "6.Exit" << endl;
-        cout << "Enter your choice: ";
-        int Choice;
-        cin >> Choice;
-        if (Choice == 1)
-        {
-            editSpecialization(Doctors, s);
-        }
-        else if (Choice == 2)
-        {
-            editStatus(Doctors, s);
-        }
-        else if (Choice == 3)
-        {
-            editFee(Doctors, s);
-        }
-        else if (Choice == 4)
-        {
-            editSalary(Doctors, s);
-        }
-        else if (Choice == 5)
-        {
-            editDoctorDetails(Doctors, s);
-        }
-        else if (Choice == 6)
-        {
-            cout << "Exiting doctor details editing" << endl;
-        }
-        else
-        {
-            cout << "Invalid choice. Please try again." << endl;
-        }
-    }
-    else if (choice == 8)
-    {
-        cout << "Editing patient details" << endl;
-        editPatientDetails(Patients, s);
-    }
-    else
-    {
-        cout << "Invalid choice. Please try again." << endl;
-    }
-}
-
-
-//password and id checker
 bool passwordChecker(string pass)
 {
     if (pass.length() <= 10)
@@ -1703,7 +1765,7 @@ int main()
             registrationVerifier = registrationportal("Doctor", "DoctorPasswords.txt");
             if (registrationVerifier)
             {
-                doctorPortal();
+                //doctorPortal();
             }
             else
                 cout << "Registration Failed" << endl;
@@ -1725,9 +1787,4 @@ int main()
     }
     cout << "Thank you for visiting" << endl; 
 
-
-
 } 
-
-
-
