@@ -1930,6 +1930,70 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
 
 
 }
+void generateFinalBill(doctor* assignedDoctor, Pmedicine* meds, int numMeds)
+{
+    int totalBill = 0;
+
+    cout << "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+
+    cout << "              PATIENT RECIPT              \n";
+
+    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+
+    if (assignedDoctor != nullptr)
+    {
+        int fee = assignedDoctor->getdoctorFee();
+
+        cout << "Consultation Details:\n";
+
+        cout << "Doctor Specialization : " << assignedDoctor->getdoctorType() << "\n";
+
+        cout << "Consultation Fee      : Rs " << fee << "\n";
+
+        totalBill += fee;
+    }
+
+    else
+    {
+        cout << "No doctor assigned. Consultation Fee: Rs 0\n";
+    }
+
+    cout << "------------------------------------------\n";
+
+    cout << "Pharmacy Charges:\n";
+
+    int pharmacyTotal = 0;
+
+    if (meds != nullptr && numMeds > 0)
+    {
+        for (int i = 0; i < numMeds; i++)
+        {
+            // Using Pmedicine's specific getters
+            int itemTotal = meds[i].getQuantity() * meds[i].getPrice();
+
+            pharmacyTotal += itemTotal;
+
+            cout << "- " << meds[i].getName() << " (" << meds[i].getType() << ")\n";
+
+            cout << "  " << meds[i].getQuantity() << " units @ Rs " << meds[i].getPrice() << " = Rs " << itemTotal << "\n";
+        }
+    }
+
+    else
+    {
+        cout << "No medicines purchased.\n";
+    }
+
+    cout << "\nPharmacy Subtotal     : Rs " << pharmacyTotal << "\n";
+
+    totalBill += pharmacyTotal;
+
+    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+
+    cout << "TOTAL AMOUNT TO BE PAID     :  RUPEES- " << totalBill << " /- \n";
+
+    cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n";
+}
 //main
 int main()
 {
