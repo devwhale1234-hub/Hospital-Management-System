@@ -358,7 +358,7 @@ public:
 //medicine class(Functions and members added as req for pharmacy class)
 class medicine
 {
-    string name;            
+    string name;
     string medicineType;
     int medicineQuantity;
     string medicineTime;
@@ -942,11 +942,17 @@ public:
         delete[] requests;
 
     }
+
+    // ----------- POINT 1: GETTER FOR BILLING -----------
+    Pmedicine* getPurchasedList() {
+        return purchased;
+    }
+
     int getPurchasedCount() {
         return purchasedCount;
     }
 
-    
+
     void clearPurchasedCart() {
         purchasedCount = 0;
     }
@@ -1587,7 +1593,9 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
     }
     cout << "Thanks you for visiting..." << endl;
 }
-void patientPortal()
+
+// new sig
+void patientPortal(doctor* Doctors, int docSize, Pharmacy& pharm)
 {
     int choice = 0;
     while (choice != 8)
@@ -1930,6 +1938,7 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
 
 
 }
+//  BILLING FUNCTION MODIFIED TO WORK WITH PMEDICINE 
 void generateFinalBill(doctor* assignedDoctor, Pmedicine* meds, int numMeds)
 {
     int totalBill = 0;
@@ -1968,7 +1977,7 @@ void generateFinalBill(doctor* assignedDoctor, Pmedicine* meds, int numMeds)
     {
         for (int i = 0; i < numMeds; i++)
         {
-            // Using Pmedicine's specific getters
+            // Using Pmedicine getters
             int itemTotal = meds[i].getQuantity() * meds[i].getPrice();
 
             pharmacyTotal += itemTotal;
@@ -1994,20 +2003,32 @@ void generateFinalBill(doctor* assignedDoctor, Pmedicine* meds, int numMeds)
 
     cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n";
 }
-//main
+
 int main()
 {
-    doctor* doctorPtr;
-    patient* patientPtr;
+    doctor* doctorPtr = nullptr;
+    patient* patientPtr = nullptr;
+
     int doctorSize = 0;
     int patientSize = 0;
+
+    int docCapacity = 100;
+    int patCapacity = 100;
+
+    Room* rooms[100];
+    int roomCount = 0;
+
+    Pharmacy pharm;
+    appointmentScheduling scheduler;
+
     bool registrationVerifier = false;
-    // bootup( doctorPtr , patientPtr , doctorSize , patientSize); 
+
+    bootup(doctorPtr, patientPtr, doctorSize, patientSize, pharm);
+
     cout << "-----Welcome to the Hospital Managment System------" << endl;
     int choice = 0;
     while (choice != 4)
     {
-
         cout << "Enter your Portal number to continue" << endl;
         cout << "1. Admin Portal" << endl;
         cout << "2. Doctor Portal" << endl;
@@ -2019,8 +2040,8 @@ int main()
             registrationVerifier = registrationportal("Admin", "AdminPasswords.txt");
             if (registrationVerifier)
             {
-                cout << "admin works ";
-                //adminPortal();
+                cout << "admin works \n";
+                adminPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, docCapacity, patCapacity);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2030,7 +2051,7 @@ int main()
             registrationVerifier = registrationportal("Doctor", "DoctorPasswords.txt");
             if (registrationVerifier)
             {
-                //doctorPortal();
+                doctorPortal(doctorPtr, patientPtr, rooms, scheduler, doctorSize, patientSize, docCapacity, patCapacity);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2041,7 +2062,7 @@ int main()
             registrationVerifier = registrationportal("Patient", "PatientPasswords.txt");
             if (registrationVerifier)
             {
-                patientPortal();
+                patientPortal(doctorPtr, doctorSize, pharm);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2051,4 +2072,15 @@ int main()
             cout << "Invalid Choice...Enter Again " << endl;
     }
     cout << "Thank you for visiting" << endl;
+
+    if (doctorPtr != nullptr)
+    {
+        delete[] doctorPtr;
+    }
+    if (patientPtr != nullptr)
+    {
+        delete[] patientPtr;
+    }
+
+    return 0;
 }
