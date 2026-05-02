@@ -1,0 +1,4 @@
+Panadol 100 10.5
+Augmentin 50 550.0
+Insulin 20 1250.0
+Arinac 200 15.0

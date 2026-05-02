@@ -1,0 +1,2 @@
+Ali,Fever,Flu
+Saad_Zeeshan,Cough,Chest_Infection
