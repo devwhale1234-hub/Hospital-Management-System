@@ -1251,7 +1251,7 @@ void addDoctor(doctor*& Doctors, int& s, int& cap) {
 }
 
 // displays all doctors
-void viewDoctors(doctor Doctors[], int s)
+void viewDoctors(doctor Doctors[], int& s)
 {
     cout << "List of Doctors:" << endl;
     for (int i = 0; i < s; i++) {
@@ -1260,7 +1260,7 @@ void viewDoctors(doctor Doctors[], int s)
 }
 
 // removes a doctor from the system array
-void removeDoctor(doctor Doctors[], int& s) {
+void removeDoctor(doctor*& Doctors, int& s) {
     cout << "Enter doctor ID to remove: ";
     string id;
     cin >> id;
@@ -1293,7 +1293,7 @@ void seePatientDetails(patient Patients[], int s) {
 }
 
 // displays room occupancy status
-void seeRoomDetails(Room* rooms[], int s) {
+void seeRoomDetails(Room* rooms[], int& s) {
     cout << "List of Rooms:" << endl;
     for (int i = 0; i < s; i++) {
         rooms[i]->displayRoomInfo();
@@ -1308,7 +1308,7 @@ void seeAppointmentDetails(appointmentScheduling& scheduler) {
 }
 
 // modifies patient data
-void editPatientDetails(patient Patients[], int s) {
+void editPatientDetails(patient Patients[], int &s) {
     cout << "Enter patient name to edit: ";
     string name;
     cin >> name;
@@ -1331,7 +1331,7 @@ void editPatientDetails(patient Patients[], int s) {
 }
 
 // modify doctor data
-void editDoctorDetails(doctor Doctors[], int s) {
+void editDoctorDetails(doctor Doctors[], int &s) {
     cout << "Enter doctor name to edit: ";
     string name;
     cin >> name;
@@ -1360,7 +1360,7 @@ void editDoctorDetails(doctor Doctors[], int s) {
 }
 
 // changes specialization
-void editSpecialization(doctor Doctors[], int s) {
+void editSpecialization(doctor Doctors[], int &s) {
     cout << "Enter doctor name to edit specialization: ";
     string name;
     cin >> name;
@@ -1379,7 +1379,7 @@ void editSpecialization(doctor Doctors[], int s) {
 }
 
 // sets doctor status flag
-void editStatus(doctor Doctors[], int s) {
+void editStatus(doctor*& Doctors, int &s) {
     cout << "Enter doctor name to edit status: ";
     string name;
     cin >> name;
@@ -1398,7 +1398,7 @@ void editStatus(doctor Doctors[], int s) {
 }
 
 // changes doctor fee
-void editFee(doctor Doctors[], int s) {
+void editFee(doctor*& Doctors, int& s) {
     cout << "Enter doctor name to edit fee: ";
     string name;
     cin >> name;
@@ -1417,7 +1417,7 @@ void editFee(doctor Doctors[], int s) {
 }
 
 // updates salary
-void editSalary(doctor Doctors[], int s) {
+void editSalary(doctor*& Doctors, int& s) {
     cout << "Enter doctor name to edit salary: ";
     string name;
     cin >> name;
@@ -1436,7 +1436,7 @@ void editSalary(doctor Doctors[], int s) {
 }
 
 // approves or rejects leave for doctors
-void manageLeaveRequests(doctor Doctors[], int s)
+void manageLeaveRequests(doctor*& Doctors, int& s)
 {
     cout << "--- Leave Requests ---" << endl;
 
@@ -1710,7 +1710,7 @@ void viewPrescription(patient Patients[], int s) {
 }
 
 // manual status update
-void setStatus(doctor Doctors[], int s) {
+void setStatus(doctor*& Doctors, int& s) {
     cout << "Enter doctor name to set status: ";
     string name;
     cin >> name;
@@ -1729,7 +1729,7 @@ void setStatus(doctor Doctors[], int s) {
 }
 
 // manual fee update
-void setFee(doctor Doctors[], int s) {
+void setFee(doctor*& Doctors, int& s) {
     cout << "Enter doctor name to set fee: ";
     string name;
     cin >> name;
