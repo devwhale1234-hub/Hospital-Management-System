@@ -1,3 +1,0 @@
-Dr. Saad,1111,2000,General
-Dr. Ahmed,2222,3500,Surgeon
-Dr. Zeeshan,3333,5000,Cardiologist
