@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <limits>
 using namespace std;
 
 // strips trailing carriage return from strings parsed on Windows-format files
@@ -9,6 +10,27 @@ string stripCR(string s)
     if (!s.empty() && s[s.size() - 1] == '\r')
         s.erase(s.size() - 1);
     return s;
+}
+
+// safety function to prevent infinite loops when user inputs char instead of int
+int getIntInput() {
+    int x;
+    while (!(cin >> x)) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input. Please enter a valid number: ";
+    }
+    return x;
+}
+
+// helper function to ignore case sensitivity in searches
+string toLowerStr(string str) {
+    string lower = "";
+    for (char c : str) {
+        if (c >= 'A' && c <= 'Z') lower += (c + 32);
+        else lower += c;
+    }
+    return lower;
 }
 
 // appointnment details class 
@@ -514,7 +536,7 @@ public:
         string bufferstring;
         for (int i = 0; i < num; i++)
         {
-            cout << "Enter medicine : " << i << endl;
+            cout << "Enter medicine : " << i + 1 << endl;
             cout << "Enter medicine Name: ";
             cin >> bufferstring;
             medicinePtr[i].setmedicineName(bufferstring);
@@ -522,7 +544,7 @@ public:
             cin >> bufferstring;
             medicinePtr[i].setmedicineType(bufferstring);
             cout << "Enter medicine quantity : ";
-            cin >> bufferint;
+            bufferint = getIntInput();
             medicinePtr[i].setmedicineQuantity(bufferint);
             cout << "Enter medicine Time: ";
             cin >> bufferstring;
@@ -582,9 +604,7 @@ public:
         roomType = type;
         isOccupied = occupied;
     }
-    virtual ~Room() {
-        cout << "Room destructor called" << endl;
-    }
+    virtual ~Room() {}
     void setNumber(int number)
     {
         roomNumber = number;
@@ -623,22 +643,18 @@ public:
         if (isOccupied)
         {
             isOccupied = false;
-            cout << "Room released successfully" << endl;
         }
         else cout << "Room is already vacant" << endl;
     }
     virtual void displayRoomInfo()
     {
-        cout << "Room Info" << endl;
-        cout << "Room Number: " << roomNumber << endl;
-        cout << "Room Type: " << roomType << endl;
-        cout << "Is Occupied: " << (isOccupied ? "Yes" : "No") << endl;
+        cout << "Room Number: " << roomNumber << " | Type: " << roomType << " | Is Occupied: " << (isOccupied ? "Yes" : "No") << endl;
     }
 };
 
 // room type
 class ICURoom : public Room {
-    const int capacity = 30;
+    const int capacity = 50;
     bool hasVentilator;
     int patientCount;
 public:
@@ -660,24 +676,12 @@ public:
     bool getHasVentilator() {
         return hasVentilator;
     }
-    void bookRoom() override {
-        if (patientCount < capacity)
-        {
-            patientCount++;
-            setIsOccupied(true);
-            cout << "Patient admitted to ICU Room successfully" << endl;
-        }
-        else
-        {
-            cout << "ICU Room is at full capacity" << endl;
-        }
-    }
 };
 
 // room type
 class GeneralRoom : public Room {
 private:
-    const int capacity = 50;
+    const int capacity = 30;
     int patientCount;
 public:
     GeneralRoom() : Room() {
@@ -690,25 +694,12 @@ public:
     {
         return capacity;
     }
-    void bookRoom() override
-    {
-        if (patientCount < capacity)
-        {
-            patientCount++;
-            setIsOccupied(true);
-            cout << "Patient admitted to General Room successfully" << endl;
-        }
-        else
-        {
-            cout << "General Room is at full capacity" << endl;
-        }
-    }
 };
 
 // room type
 class EmergencyRoom : public Room {
 private:
-    const int capacity = 10;
+    const int capacity = 20;
     int patientCount;
 public:
     EmergencyRoom() : Room() {
@@ -720,19 +711,6 @@ public:
     int getCapacity()
     {
         return capacity;
-    }
-    void bookRoom() override
-    {
-        if (patientCount < capacity)
-        {
-            patientCount++;
-            setIsOccupied(true);
-            cout << "Patient admitted to Emergency Room successfully" << endl;
-        }
-        else
-        {
-            cout << "Emergency Room is at full capacity" << endl;
-        }
     }
 };
 
@@ -759,10 +737,8 @@ public:
         cout << "Welcome: " << p.getcommonpersonName() << endl;
         cout << "Please book your appointment" << endl;
         cout << "Select doctor specialization: " << endl;
-        cout << "1. General\n2. Surgeon\n3. Cardiologist" << endl;
-        int choice;
-        cout << "Enter your choice: ";
-        cin >> choice;
+        cout << "1. General\n2. Surgeon\n3. Cardiologist\nChoice: ";
+        int choice = getIntInput();
         string Byname = "";
         if (choice == 1)
         {
@@ -783,7 +759,7 @@ public:
         }
         cout << "Available Doctors for " << Byname << ":" << endl;
         for (int i = 0; i < s; i++) {
-            if (Doctors[i].getdoctorType() == Byname) {
+            if (toLowerStr(Doctors[i].getdoctorType()) == toLowerStr(Byname)) {
                 cout << "  " << Doctors[i].getcommonpersonName() << "  " << Doctors[i].getdoctorStatus() << " " << Doctors[i].getdoctorType() << " " << endl;
             }
         }
@@ -802,7 +778,7 @@ public:
         string day;
         cin >> day;
         for (int i = 0; i < s; i++) {
-            if (Doctors[i].getcommonpersonName() == name)
+            if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name))
             {
                 if (Doctors[i].getdoctorStatus() == "free")
                 {
@@ -1031,7 +1007,7 @@ public:
 
     int findMedicine(string name) {
         for (int i = 0; i < medCount; i++) {
-            if (inventory[i].getName() == name) {
+            if (toLowerStr(inventory[i].getName()) == toLowerStr(name)) {
                 return i;
             }
         }
@@ -1045,6 +1021,13 @@ public:
         else {
             return false;
         }
+    }
+
+    // allows admin to increment stock quantities
+    void addStock(int index, int qty) {
+        int cur = inventory[index].getQuantity();
+        inventory[index].setQuantity(cur + qty);
+        saveToFile("medicine.txt");
     }
 
     // appends low stock items to a separate text file dynamically 
@@ -1124,13 +1107,15 @@ public:
     }
     void showInventory() {
         for (int i = 0; i < medCount; i++) {
-            cout << inventory[i].getName() << " - "
-                << inventory[i].getQuantity() << endl;
+            cout << inventory[i].getName() << " - Type: " << inventory[i].getType() << " - Stock: " << inventory[i].getQuantity() << " - Price: Rs " << inventory[i].getPrice() << endl;
         }
     }
     void showReorders() {
         for (int i = 0; i < requestCount; i++) {
             requests[i].display();
+        }
+        if (requestCount == 0) {
+            cout << "No pending reorder requests." << endl;
         }
     }
 
@@ -1266,8 +1251,7 @@ void addDoctor(doctor*& Doctors, int& s, const int MAX_DOCS) {
     string name;
     cin >> name;
     cout << "Enter doctor age: ";
-    int age;
-    cin >> age;
+    int age = getIntInput();
     cout << "Enter doctor specialization: ";
     string type;
     cin >> type;
@@ -1275,11 +1259,9 @@ void addDoctor(doctor*& Doctors, int& s, const int MAX_DOCS) {
     string status;
     cin >> status;
     cout << "Enter doctor fee: ";
-    int fee;
-    cin >> fee;
+    int fee = getIntInput();
     cout << "Enter doctor salary: ";
-    int salary;
-    cin >> salary;
+    int salary = getIntInput();
     newArr[s] = doctor(id, name, age, type, status, fee, salary, false, NULL);
 
     if (Doctors != nullptr) delete[] Doctors;
@@ -1298,7 +1280,7 @@ void addDoctor(doctor*& Doctors, int& s, const int MAX_DOCS) {
 // displays all doctors and calculates ratings dynamically
 void viewDoctors(doctor Doctors[], int s)
 {
-    cout << "List of Doctors:" << endl;
+    cout << "\n--- List of Doctors ---\n";
     for (int i = 0; i < s; i++) {
         string dName = Doctors[i].getcommonpersonName();
         int totalRating = 0;
@@ -1325,10 +1307,12 @@ void viewDoctors(doctor Doctors[], int s)
         double avg = count > 0 ? (double)totalRating / count : 0.0;
         string ratingStr = count > 0 ? to_string(avg).substr(0, 3) : "No ratings";
 
-        cout << "Name: " << dName
-            << "  Specialization: " << Doctors[i].getdoctorType()
-            << " Status: " << Doctors[i].getdoctorStatus()
-            << " Avg Rating: " << ratingStr << " (" << count << " reviews)" << endl;
+        cout << "ID: " << Doctors[i].getcommonpersonID() << " | Name: " << dName
+            << " | Spec: " << Doctors[i].getdoctorType()
+            << " | Status: " << Doctors[i].getdoctorStatus()
+            << " | Fee: " << Doctors[i].getdoctorFee()
+            << " | Salary: " << Doctors[i].getdoctorSalary()
+            << " | Avg Rating: " << ratingStr << " (" << count << " reviews)" << endl;
     }
 }
 
@@ -1346,13 +1330,20 @@ void viewDoctorReviews() {
             int pos = line.find(',');
             if (pos != string::npos) {
                 string dName = line.substr(0, pos);
-                if (dName == name) {
+                if (toLowerStr(dName) == toLowerStr(name)) {
                     found = true;
                     string rest = line.substr(pos + 1);
-                    int pos2 = rest.find(',');
-                    string rating = rest.substr(0, pos2);
-                    string review = rest.substr(pos2 + 1);
-                    cout << "Rating: " << rating << "/5 | Review: " << review << endl;
+                    int p2 = rest.find(',');
+                    string rating = rest.substr(0, p2);
+                    rest = rest.substr(p2 + 1);
+                    int p3 = rest.find(',');
+                    string review = rest.substr(0, p3);
+                    rest = rest.substr(p3 + 1);
+                    int p4 = rest.find(',');
+                    string pName = rest.substr(0, p4);
+                    string pId = rest.substr(p4 + 1);
+
+                    cout << "Patient: " << pName << " (ID: " << pId << ") | Rating: " << rating << "/5 | Review: " << review << endl;
                 }
             }
         }
@@ -1367,13 +1358,19 @@ void rateDoctor() {
     string name;
     cin >> name;
     cout << "Enter rating (1 to 5): ";
-    int rating;
-    cin >> rating;
+    int rating = getIntInput();
     if (rating < 1 || rating > 5)
     {
         cout << "Invalid rating. Please enter a value between 1 and 5." << endl;
         return;
     }
+    cout << "Enter your Patient Name: ";
+    string pName;
+    cin >> pName;
+    cout << "Enter your Patient ID: ";
+    string pId;
+    cin >> pId;
+
     cout << "Enter your review: ";
     string review;
     cin.ignore();
@@ -1381,7 +1378,7 @@ void rateDoctor() {
 
     ofstream revFile("doctor_reviews.txt", ios::app);
     if (revFile) {
-        revFile << name << "," << rating << "," << review << endl;
+        revFile << name << "," << rating << "," << review << "," << pName << "," << pId << endl;
         revFile.close();
         cout << "Thank you! Rating submitted successfully." << endl;
     }
@@ -1393,7 +1390,7 @@ void removeDoctor(doctor*& Doctors, int& s) {
     string id;
     cin >> id;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonID() == id) {
+        if (toLowerStr(Doctors[i].getcommonpersonID()) == toLowerStr(id)) {
             for (int j = i; j < s - 1; j++) {
                 Doctors[j] = Doctors[j + 1];
             }
@@ -1424,22 +1421,25 @@ void removeDoctor(doctor*& Doctors, int& s) {
     cout << "Doctor not found." << endl;
 }
 
-// shows patient list
+// shows patient list with IDs
 void seePatientDetails(patient Patients[], int s) {
     cout << "List of Patients:" << endl;
     for (int i = 0; i < s; i++) {
-        cout << "Name: " << Patients[i].getcommonpersonName() << "  Age: " << Patients[i].getcommonpersonAge() << " Type: " << Patients[i].getpatientType() << endl;
+        cout << "ID: " << Patients[i].getcommonpersonID() << " | Name: " << Patients[i].getcommonpersonName() << " | Age: " << Patients[i].getcommonpersonAge() << " | Type: " << Patients[i].getpatientType() << endl;
     }
 }
 
-// displays room occupancy status
+// displays room occupancy status for all rooms
 void seeRoomDetails(Room** rooms, int s) {
-    cout << "List of Rooms:" << endl;
-    if (s == 0) cout << "No rooms currently allocated." << endl;
+    cout << "--- Complete Room Directory ---" << endl;
+    if (s == 0) {
+        cout << "No rooms configured." << endl;
+        return;
+    }
     for (int i = 0; i < s; i++) {
         rooms[i]->displayRoomInfo();
-        cout << endl;
     }
+    cout << endl;
 }
 
 // prints active appointment
@@ -1454,13 +1454,12 @@ void editPatientDetails(patient Patients[], int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Patients[i].getcommonpersonName() == name) {
+        if (toLowerStr(Patients[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing details for " << name << endl;
-            int age;
-            string type;
             cout << "New Age: ";
-            cin >> age;
+            int age = getIntInput();
             cout << "New Type: ";
+            string type;
             cin >> type;
             Patients[i].setcommonpersonAge(age);
             Patients[i].setpatientType(type);
@@ -1477,18 +1476,16 @@ void editDoctorDetails(doctor Doctors[], int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing details for Dr. " << name << endl;
-            string type, status;
-            int fee, salary;
             cout << "New Specialization: ";
-            cin >> type;
+            string type; cin >> type;
             cout << "New Status: ";
-            cin >> status;
+            string status; cin >> status;
             cout << "New Fee: ";
-            cin >> fee;
+            int fee = getIntInput();
             cout << "New Salary: ";
-            cin >> salary;
+            int salary = getIntInput();
             Doctors[i].setdoctorType(type);
             Doctors[i].setdoctorStatus(status);
             Doctors[i].setdoctorFee(fee);
@@ -1506,7 +1503,7 @@ void editSpecialization(doctor Doctors[], int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing specialization for Dr. " << name << endl;
             string type;
             cout << "New Specialization: ";
@@ -1525,7 +1522,7 @@ void editStatus(doctor*& Doctors, int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing status for Dr. " << name << endl;
             string status;
             cout << "New Status: ";
@@ -1544,11 +1541,10 @@ void editFee(doctor*& Doctors, int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing fee for Dr. " << name << endl;
-            int fee;
             cout << "New Fee: ";
-            cin >> fee;
+            int fee = getIntInput();
             Doctors[i].setdoctorFee(fee);
             cout << "Doctor fee changed successfully." << endl;
             return;
@@ -1563,11 +1559,10 @@ void editSalary(doctor*& Doctors, int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Editing salary for Dr. " << name << endl;
-            int salary;
             cout << "New Salary: ";
-            cin >> salary;
+            int salary = getIntInput();
             Doctors[i].setdoctorSalary(salary);
             cout << "Doctor salary changed successfully." << endl;
             return;
@@ -1595,9 +1590,7 @@ void manageLeaveRequests(doctor*& Doctors, int& s)
 
             cout << "2. Reject Leave" << endl;
 
-            int adminChoice;
-
-            cin >> adminChoice;
+            int adminChoice = getIntInput();
 
             if (adminChoice == 1)
             {
@@ -1686,14 +1679,14 @@ void viewFeedback()
 }
 
 // admin portal menu
-void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& ds, int& ps, const int MAX_DOCS, const int MAX_PATS, int& unreadFeedback) {
+void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& ds, int& ps, const int MAX_DOCS, const int MAX_PATS, int& unreadFeedback, Pharmacy& pharm) {
     cout << "Welcome to the Admin Portal" << endl;
     if (unreadFeedback > 0) {
         cout << " NOTIFICATION: You have " << unreadFeedback << " unread patient feedbacks/complaints! " << endl;
     }
     int choice = 0;
-    while (choice != 12) {
-        cout << "1. Add Doctor" << endl;
+    while (choice != 14) {
+        cout << "\n1. Add Doctor" << endl;
         cout << "2. View Doctors" << endl;
         cout << "3. Remove Doctor" << endl;
         cout << "4. see patient details" << endl;
@@ -1704,17 +1697,18 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_
         cout << "9. Manage Leave Requests" << endl;
         cout << "10. View Signup Details" << endl;
         cout << "11. View Feedback" << endl;
-        cout << "12. exit" << endl;
+        cout << "12. View Doctor Reviews" << endl;
+        cout << "13. Manage Pharmacy Inventory" << endl;
+        cout << "14. exit" << endl;
 
         cout << "Enter your choice: ";
-        cin >> choice;
+        choice = getIntInput();
         if (choice == 1) {
             cout << "Adding a new doctor" << endl;
             addDoctor(Doctors, ds, MAX_DOCS);
         }
         else if (choice == 2)
         {
-            cout << "Viewing all doctors" << endl;
             viewDoctors(Doctors, ds);
         }
         else if (choice == 3)
@@ -1724,17 +1718,14 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_
         }
         else if (choice == 4)
         {
-            cout << "Viewing patient details" << endl;
             seePatientDetails(Patients, ps);
         }
         else if (choice == 5)
         {
-            cout << "Viewing room details" << endl;
             seeRoomDetails(rooms, room_c);
         }
         else if (choice == 6)
         {
-            cout << "Viewing appointment details" << endl;
             seeAppointmentDetails(scheduler);
         }
         else if (choice == 7)
@@ -1746,10 +1737,9 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_
             cout << "3. Fee" << endl;
             cout << "4. Salary" << endl;
             cout << "5. All details" << endl;
-            cout << "6.Exit" << endl;
-            cout << "Enter your choice: ";
-            int Choice;
-            cin >> Choice;
+            cout << "6. Exit" << endl;
+            cout << "Choice: ";
+            int Choice = getIntInput();
             if (Choice == 1)
             {
                 editSpecialization(Doctors, ds);
@@ -1799,6 +1789,40 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_
         }
         else if (choice == 12)
         {
+            viewDoctorReviews();
+        }
+        else if (choice == 13)
+        {
+            cout << "--- Manage Pharmacy ---\n1. View Inventory\n2. Add New Medicine\n3. Restock Existing Medicine\n4. View Reorders\n5. Go Back\nChoice: ";
+            int phChoice = getIntInput();
+            if (phChoice == 1) {
+                pharm.showInventory();
+            }
+            else if (phChoice == 2) {
+                cout << "Name: "; string mn; cin >> mn;
+                cout << "Type: "; string mt; cin >> mt;
+                cout << "Qty: "; int mq = getIntInput();
+                cout << "Price: "; float mp; cin >> mp;
+                pharm.addMedicine(Pmedicine(mn, mt, mq, mp));
+                pharm.saveToFile("medicine.txt");
+                cout << "Medicine added to inventory.\n";
+            }
+            else if (phChoice == 3) {
+                cout << "Enter Medicine Name to restock: "; string mn; cin >> mn;
+                int idx = pharm.findMedicine(mn);
+                if (idx != -1) {
+                    cout << "Enter quantity to add to current stock: "; int addQ = getIntInput();
+                    pharm.addStock(idx, addQ);
+                    cout << "Restock successful.\n";
+                }
+                else cout << "Medicine not found in inventory.\n";
+            }
+            else if (phChoice == 4) {
+                pharm.showReorders();
+            }
+        }
+        else if (choice == 14)
+        {
             cout << "Exiting Admin Portal" << endl;
         }
         else
@@ -1811,9 +1835,9 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_
 
 // view function for patient array
 void viewAllpatients(patient Patients[], int s) {
-    cout << "List of Patients:" << endl;
+    cout << "\n--- List of Patients ---" << endl;
     for (int i = 0; i < s; i++) {
-        cout << "Name: " << Patients[i].getcommonpersonName() << "  Age: " << Patients[i].getcommonpersonAge() << " Type: " << Patients[i].getpatientType() << endl;
+        cout << "ID: " << Patients[i].getcommonpersonID() << " | Name: " << Patients[i].getcommonpersonName() << " | Age: " << Patients[i].getcommonpersonAge() << " | Type: " << Patients[i].getpatientType() << endl;
     }
 }
 
@@ -1823,7 +1847,7 @@ void viewHealthRecord(patient Patients[], int s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Patients[i].getcommonpersonName() == name) {
+        if (toLowerStr(Patients[i].getcommonpersonName()) == toLowerStr(name)) {
             cout << "Health Record for " << name << endl;
             cout << "Symptoms: " << Patients[i].getSymptoms() << endl;
             cout << "Diagnosis: " << Patients[i].getDiagnosis() << endl;
@@ -1841,8 +1865,8 @@ void viewPrescription(patient Patients[], int s) {
     cin >> name;
     bool found = false;
     for (int i = 0; i < s; i++) {
-        if (Patients[i].getcommonpersonName() == name) {
-            cout << "Prescription for " << name << endl;
+        if (toLowerStr(Patients[i].getcommonpersonName()) == toLowerStr(name)) {
+            cout << "Prescription for " << Patients[i].getcommonpersonName() << endl;
             cout << "Patient Name: " << Patients[i].getcommonpersonName() << endl;
             cout << "Patient ID: " << Patients[i].getcommonpersonID() << endl;
             cout << "Patient Age: " << Patients[i].getcommonpersonAge() << endl;
@@ -1865,7 +1889,7 @@ void viewPrescription(patient Patients[], int s) {
             int pos = line.find(',');
             if (pos != string::npos) {
                 string pName = line.substr(0, pos);
-                if (pName == name) {
+                if (toLowerStr(pName) == toLowerStr(name)) {
                     hasMeds = true;
                     string rest = line.substr(pos + 1);
                     int p2 = rest.find(',');
@@ -1914,8 +1938,7 @@ void addPatient(patient*& Patients, int& s, const int MAX_PATS) {
     string name;
     cin >> name;
     cout << "Enter patient age: ";
-    int age;
-    cin >> age;
+    int age = getIntInput();
     cout << "Enter patient type: ";
     string type;
     cin >> type;
@@ -1947,7 +1970,7 @@ void removePatient(patient*& Patients, int& s) {
     string name;
     cin >> name;
     for (int i = 0; i < s; i++) {
-        if (Patients[i].getcommonpersonName() == name) {
+        if (toLowerStr(Patients[i].getcommonpersonName()) == toLowerStr(name)) {
             for (int j = i; j < s - 1; j++) {
                 Patients[j] = Patients[j + 1];
             }
@@ -1971,42 +1994,28 @@ void removePatient(patient*& Patients, int& s) {
 }
 
 // leave application function for doctor
-void applyLeave(doctor Doctors[], int s)
+void applyLeave(doctor Doctors[], int s, string loggedInName)
 {
-    cout << "Enter doctor name to apply for leave: ";
-
-    string name;
-
-    cin >> name;
-
     for (int i = 0; i < s; i++)
     {
-        if (Doctors[i].getcommonpersonName() == name)
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(loggedInName))
         {
-            cout << "Sending leave request to Admin for Dr. " << name << endl;
-
+            cout << "Sending leave request to Admin for Dr. " << Doctors[i].getcommonpersonName() << endl;
             string status = "leave_requested";
-
             Doctors[i].setdoctorStatus(status);
-
             cout << "Request sent successfully! Pending Admin approval." << endl;
-
             return;
         }
     }
-
-    cout << "Doctor not found." << endl;
+    cout << "Action failed." << endl;
 }
 
 // doctor sets own status
-void setStatus(doctor Doctors[], int s)
+void setStatus(doctor Doctors[], int s, string loggedInName)
 {
-    cout << "Enter your doctor name: ";
-    string name;
-    cin >> name;
     for (int i = 0; i < s; i++)
     {
-        if (Doctors[i].getcommonpersonName() == name)
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(loggedInName))
         {
             cout << "Enter new status (free/busy): ";
             string status;
@@ -2016,42 +2025,68 @@ void setStatus(doctor Doctors[], int s)
             return;
         }
     }
-    cout << "Doctor not found." << endl;
 }
 
 // doctor sets own fee
-void setFee(doctor Doctors[], int s)
+void setFee(doctor Doctors[], int s, string loggedInName)
 {
-    cout << "Enter your doctor name: ";
-    string name;
-    cin >> name;
     for (int i = 0; i < s; i++)
     {
-        if (Doctors[i].getcommonpersonName() == name)
+        if (toLowerStr(Doctors[i].getcommonpersonName()) == toLowerStr(loggedInName))
         {
             cout << "Enter new fee: ";
-            int fee;
-            cin >> fee;
+            int fee = getIntInput();
             Doctors[i].setdoctorFee(fee);
             cout << "Fee updated successfully." << endl;
             return;
         }
     }
-    cout << "Doctor not found." << endl;
 }
-
-// doctor views their current appointment
-void seeAppointments(appointmentScheduling& scheduler)
-{
+// calls scheduler to display appointment
+void seeAppointments(appointmentScheduling& scheduler) {
+    cout << "\nViewing appointments..." << endl;
     scheduler.successfulAppointment();
 }
-
 // doctor portal menu
-void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& doc_s, int& pat_s, const int MAX_DOCS, const int MAX_PATS, const int MAX_ROOMS) {
-    cout << "Welcome to the Doctor Portal" << endl;
+void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& doc_s, int& pat_s, const int MAX_DOCS, const int MAX_PATS, const int MAX_ROOMS, Pharmacy& pharm) {
+    cout << "\nWelcome to the Doctor Portal" << endl;
+
+    // Login Verification to associate actions with logged in doctor
+    cout << "Enter your Doctor ID to login: ";
+    string loginId;
+    cin >> loginId;
+    doctor* loggedInDoc = nullptr;
+    for (int i = 0; i < doc_s; i++) {
+        if (Doctors[i].getcommonpersonID() == loginId) {
+            loggedInDoc = &Doctors[i];
+            break;
+        }
+    }
+    if (loggedInDoc == nullptr) {
+        cout << "Doctor ID not found. Returning to main menu.\n";
+        return;
+    }
+
+    // Leave status enforcement
+    if (loggedInDoc->getdoctorStatus() == "on leave") {
+        cout << "Your status is currently set to 'on leave'.\nYou must change your status back to 'free' to log in.\nChange to free? (y/n): ";
+        char ans;
+        cin >> ans;
+        if (ans == 'y' || ans == 'Y') {
+            loggedInDoc->setdoctorStatus("free");
+            cout << "Status successfully changed to free.\n";
+        }
+        else {
+            cout << "Cannot login while on leave. Returning to main menu.\n";
+            return;
+        }
+    }
+
+    cout << "Welcome, Dr. " << loggedInDoc->getcommonpersonName() << "!" << endl;
+
     int choice = 0;
-    while (choice != 12) {
-        cout << "Press key to perform task " << endl;
+    while (choice != 13) {
+        cout << "\nPress key to perform task " << endl;
         cout << "1. View all Patients" << endl;
         cout << "2. View Patient's Health Record" << endl;
         cout << "3. View Patient's Prescription" << endl;
@@ -2063,8 +2098,10 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room
         cout << "9. Apply for Leave" << endl;
         cout << "10. Admit Patient to Room" << endl;
         cout << "11. Release Room" << endl;
-        cout << "12. exit " << endl;
-        cin >> choice;
+        cout << "12. Prescribe Medicine" << endl;
+        cout << "13. exit " << endl;
+        choice = getIntInput();
+
         switch (choice)
         {
         case 1:
@@ -2077,10 +2114,10 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room
             viewPrescription(Patients, pat_s);
             break;
         case 4:
-            setStatus(Doctors, doc_s);
+            setStatus(Doctors, doc_s, loggedInDoc->getcommonpersonName());
             break;
         case 5:
-            setFee(Doctors, doc_s);
+            setFee(Doctors, doc_s, loggedInDoc->getcommonpersonName());
             break;
         case 6:
             seeAppointments(scheduler);
@@ -2092,62 +2129,112 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room
             removePatient(Patients, pat_s);
             break;
         case 9:
-            applyLeave(Doctors, doc_s);
+            applyLeave(Doctors, doc_s, loggedInDoc->getcommonpersonName());
             break;
         case 10:
         {
-            if (room_c >= MAX_ROOMS) {
-                cout << "Error: Hospital is at full capacity (" << MAX_ROOMS << " rooms). Cannot admit more patients untill the rooms are cleared." << endl;
+            cout << "\n--- Admit Patient ---" << endl;
+            viewAllpatients(Patients, pat_s);
+            cout << "\nEnter Patient ID to Admit (0 to cancel): ";
+            string pId; cin >> pId;
+            if (pId == "0") break;
+
+            cout << "\nSelect Room Type:\n1. General (Capacity 30)\n2. ICU (Capacity 50)\n3. Emergency (Capacity 20)\nChoice: ";
+            int rType = getIntInput();
+            string targetType = "";
+            if (rType == 1) targetType = "General";
+            else if (rType == 2) targetType = "ICU";
+            else if (rType == 3) targetType = "Emergency";
+            else {
+                cout << "Invalid room type." << endl;
+                break;
+            }
+
+            int firstFree = -1;
+            int firstOccupied = -1;
+
+            // search pre-allocated 100 rooms for requested type
+            for (int i = 0; i < room_c; i++) {
+                if (rooms[i]->getType() == targetType) {
+                    if (!rooms[i]->getIsOccupied() && firstFree == -1) firstFree = i;
+                    if (rooms[i]->getIsOccupied() && firstOccupied == -1) firstOccupied = i;
+                }
+            }
+
+            if (firstFree != -1) {
+                rooms[firstFree]->setIsOccupied(true);
+                cout << "Patient successfully admitted to " << targetType << " Room " << rooms[firstFree]->getNumber() << "." << endl;
             }
             else {
-                Room** newRooms = new Room * [room_c + 1];
-                for (int i = 0; i < room_c; i++) {
-                    newRooms[i] = rooms[i];
+                cout << "All " << targetType << " rooms are at full capacity.\nWould you like to deallocate the oldest occupied room (Room " << rooms[firstOccupied]->getNumber() << ")? (y/n): ";
+                char override; cin >> override;
+                if (override == 'y' || override == 'Y') {
+                    rooms[firstOccupied]->releaseRoom();
+                    rooms[firstOccupied]->setIsOccupied(true);
+                    cout << "Patient successfully admitted to " << targetType << " Room " << rooms[firstOccupied]->getNumber() << "." << endl;
                 }
-                newRooms[room_c] = new GeneralRoom(room_c + 1, "General", true);
-                if (rooms != nullptr) {
-                    delete[] rooms;
+                else {
+                    cout << "Admission cancelled." << endl;
                 }
-                rooms = newRooms;
-                room_c++;
-                cout << "Patient successfully admitted to Room " << room_c << "." << endl;
             }
         }
         break;
         case 11:
         {
             cout << "Enter room number to release: ";
-            int rNum;
-            cin >> rNum;
+            int rNum = getIntInput();
             bool found = false;
             for (int i = 0; i < room_c; i++) {
                 if (rooms[i]->getNumber() == rNum) {
                     found = true;
-                    rooms[i]->releaseRoom();
-                    delete rooms[i];
-
-                    Room** newRooms = nullptr;
-                    if (room_c - 1 > 0) {
-                        newRooms = new Room * [room_c - 1];
-                        int idx = 0;
-                        for (int j = 0; j < room_c; j++) {
-                            if (j != i) {
-                                newRooms[idx++] = rooms[j];
-                            }
-                        }
+                    if (rooms[i]->getIsOccupied()) {
+                        rooms[i]->releaseRoom();
                     }
-                    delete[] rooms;
-                    rooms = newRooms;
-                    room_c--;
-                    cout << "Room " << rNum << " cleared and deallocated." << endl;
+                    else {
+                        cout << "Room is already vacant." << endl;
+                    }
                     break;
                 }
             }
             if (!found) cout << "Room not found." << endl;
         }
         break;
+        case 12:
+        {
+            cout << "Enter patient name to prescribe medicine: ";
+            string pName; cin >> pName;
+
+            patient dummyPatient;
+            dummyPatient.setcommonpersonName(pName);
+
+            cout << "\n--- Current Pharmacy Inventory ---" << endl;
+            pharm.showInventory();
+
+            cout << "\nEnter number of distinct medicines to prescribe (0 to cancel): ";
+            int numMeds = getIntInput();
+
+            if (numMeds > 0)
+            {
+                prescription docPres(loggedInDoc, dummyPatient, numMeds);
+
+                // automatically log non-resident medicines as custom requests
+                for (int i = 0; i < docPres.getCount(); i++) {
+                    string medn = docPres.getMedicine(i).getmedicineName();
+                    if (!pharm.isAvailable(medn)) {
+                        cout << "\nNOTICE TO PATIENT: " << medn << " is not in the resident pharmacy. You will need to acquire this externally." << endl;
+                        pharm.sendReorder(medn, "Custom_Prescription", docPres.getMedicine(i).getmedicineQuantity());
+                    }
+                }
+                docPres.saveToFile("prescriptions.txt");
+                cout << "Prescription saved to patient record." << endl;
+            }
+        }
+        break;
+        case 13:
+            cout << "Logging out..." << endl;
+            break;
         default:
-            if (choice != 12) cout << "Invalid choice. Please try again." << endl;
+            cout << "Invalid choice. Please try again." << endl;
         }
     }
     cout << "Thank you for visiting..." << endl;
@@ -2159,25 +2246,25 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
     int choice = 0;
     while (choice != 8)
     {
-        cout << "----------------Welcome To The Patient Portal----------------------" << endl;
+        cout << "\n----------------Welcome To The Patient Portal----------------------" << endl;
         cout << "Press key to perform task " << endl;
         cout << "1. View all Doctors" << endl;
         cout << "2. Book an appointment" << endl;
         cout << "3. View Health Record" << endl;
         cout << "4. View Prescription" << endl;
-        cout << "5. Buy Medicine" << endl;
+        cout << "5. Buy Medicine / Checkout" << endl;
         cout << "6. Fill a complain" << endl;
         cout << "7. Fill a suggestion" << endl;
         cout << "8. Exit" << endl;
-        cin >> choice;
+        choice = getIntInput();
+
         switch (choice)
         {
         case 1:
         {
             viewDoctors(Doctors, docSize);
             cout << "\n1. Read Doctor Reviews\n2. Rate a Doctor\n3. Go Back\nChoice: ";
-            int subChoice;
-            cin >> subChoice;
+            int subChoice = getIntInput();
             if (subChoice == 1) {
                 viewDoctorReviews();
             }
@@ -2193,7 +2280,7 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
             cin >> pName;
             bool found = false;
             for (int i = 0; i < patSize; i++) {
-                if (Patients[i].getcommonpersonName() == pName) {
+                if (toLowerStr(Patients[i].getcommonpersonName()) == toLowerStr(pName)) {
                     scheduler.scheduleAppointment(Patients[i], Doctors, docSize);
                     found = true;
                     break;
@@ -2209,15 +2296,12 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
             viewPrescription(Patients, patSize);
             break;
         case 5:
+        {
             cout << "Available Inventory:\n";
-
             pharm.showInventory();
 
-            int medAmount;
-
             cout << "Enter number of different medicines to buy (0 to skip to bill): ";
-
-            cin >> medAmount;
+            int medAmount = getIntInput();
 
             if (medAmount > 0)
             {
@@ -2231,7 +2315,6 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
                 prescription selfPrescription(nullptr, dummyPatient, medAmount);
 
                 pharm.presProcess(selfPrescription);
-
                 selfPrescription.saveToFile("prescriptions.txt");
             }
 
@@ -2239,13 +2322,16 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
             {
                 generateFinalBill(scheduler.getSelectedDoctor(), pharm.purchased, pharm.purchasedCount);
             }
-
             else
             {
                 generateFinalBill(nullptr, pharm.purchased, pharm.purchasedCount);
             }
 
-            break;
+            cout << "Would you like to leave a review for your doctor before leaving? (y/n): ";
+            char rev; cin >> rev;
+            if (rev == 'y' || rev == 'Y') rateDoctor();
+        }
+        break;
         case 6:
         {
             cout << "Enter your complaint: ";
@@ -2276,11 +2362,13 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
             }
         }
         break;
+        case 8:
+            cout << "Logging out..." << endl;
+            break;
         default:
-            if (choice != 8) cout << "Invalid choice. Please try again." << endl;
+            cout << "Invalid choice. Please try again." << endl;
         }
     }
-
     cout << "Thank you for visiting..." << endl;
 }
 
@@ -2359,14 +2447,14 @@ bool registrationportal(string name, string file)
     bool idValidation = false;
     bool passValidation = false;
     bool formatValidation = true;
-    cout << "-----" << name << " registration-----" << endl;
+    cout << "\n----- " << name << " Portal -----" << endl;
     while (choice != 3)
     {
         cout << "Enter your choice to continue" << endl;
         cout << "1. Login" << endl;
         cout << "2. Sign Up" << endl;
-        cout << "3. Exit" << endl;
-        cin >> choice;
+        cout << "3. Go Back" << endl;
+        choice = getIntInput();
         if (choice == 1)
         {
             idValidation = false;
@@ -2480,16 +2568,22 @@ bool registrationportal(string name, string file)
             cout << "Invalid Choice...Enter Again " << endl;
         }
     }
-    cout << "Thank you for visiting" << endl;
     return false;
 }
 
 // populates the system arrays with data from text files at startup
 // parses strings using find(',') and substr() to locate variables
 // converts numeric strings via stoi before instantiating objects
-void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharmacy& pharm)
+void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharmacy& pharm, Room**& rooms, int& room_c)
 {
     pharm.loadFromFile("medicine.txt");
+
+    // Pre-allocate the hardcoded capacity 100 rooms cleanly (30 gen, 50 icu, 20 er)
+    room_c = 100;
+    rooms = new Room * [room_c];
+    for (int i = 0; i < 30; i++) rooms[i] = new GeneralRoom(i + 1, "General", false);
+    for (int i = 30; i < 80; i++) rooms[i] = new ICURoom(i + 1, "ICU", false, false);
+    for (int i = 80; i < 100; i++) rooms[i] = new EmergencyRoom(i + 1, "Emergency", false);
 
     // verifying new files added in step 5 and 6
     ifstream presCheck("prescriptions.txt");
@@ -2652,38 +2746,33 @@ int main()
 
     // Bootup is called; pointers are instantiated perfectly to size found on disk. 
     // No wasted array blocks.
-    bootup(doctorPtr, patientPtr, doctorSize, patientSize, pharm);
+    bootup(doctorPtr, patientPtr, doctorSize, patientSize, pharm, rooms, roomCount);
 
-    cout << "-----Welcome to the Hospital Management System------" << endl;
     int choice = 0;
     while (choice != 4)
     {
+        cout << "\n-----Welcome to the Hospital Management System------" << endl;
         cout << "Enter your Portal number to continue" << endl;
         cout << "1. Admin Portal" << endl;
         cout << "2. Doctor Portal" << endl;
         cout << "3. Patient Portal" << endl;
-        cout << "4. Exit" << endl;
-        cin >> choice;
+        cout << "4. Exit System" << endl;
+        choice = getIntInput();
         if (choice == 1)
         {
             registrationVerifier = registrationportal("Admin", "AdminPasswords.txt");
             if (registrationVerifier)
             {
-                adminPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, unreadFeedback);
+                adminPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, unreadFeedback, pharm);
             }
-            else
-                cout << "Registration Failed" << endl;
         }
         else if (choice == 2)
         {
             registrationVerifier = registrationportal("Doctor", "DoctorPasswords.txt");
             if (registrationVerifier)
             {
-                doctorPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, MAX_HOSPITAL_ROOMS);
+                doctorPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, MAX_HOSPITAL_ROOMS, pharm);
             }
-            else
-                cout << "Registration Failed" << endl;
-
         }
         else if (choice == 3)
         {
@@ -2692,14 +2781,11 @@ int main()
             {
                 patientPortal(doctorPtr, doctorSize, patientPtr, patientSize, pharm, scheduler, unreadFeedback);
             }
-            else
-                cout << "Registration Failed" << endl;
-
         }
         else if (choice != 4)
             cout << "Invalid Choice...Enter Again " << endl;
     }
-    cout << "Thank you for visiting" << endl;
+    cout << "Thank you for using the Hospital Management System." << endl;
 
     if (doctorPtr != nullptr)
     {
