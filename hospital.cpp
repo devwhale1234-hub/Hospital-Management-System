@@ -2308,7 +2308,7 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
     patientfile.close();
 }
 
-// main entry point of the hospital management system
+// main 
 int main()
 {
     doctor* doctorPtr = nullptr;
