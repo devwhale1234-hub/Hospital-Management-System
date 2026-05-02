@@ -1,3 +1,0 @@
-001,Ali,30,Simple Care,Fever,Common Cold
-002,Sara,25,Simple Care,Headache,Migraine
-003,Ahmed,40,Critical,Abdominal Pain,Stomach pain
