@@ -1,6 +1,0 @@
-5
- ID, 001, Name, Ali, Age, 30, Type, Simple Care, Symptoms, Fever , Diagnose, Common Cold
- ID, 002, Name, Sara, Age, 25, Type, Simple Care, Symptoms, Headache , Diagnose, Migraine
- ID, 003, Name, Ahmed, Age, 40, Type, Critical, Symptoms, Abdominal Pain, Diagnose, Stomach pain
- ID, 004, Name, Fatima, Age, 35, Type, Critical, Symptoms, Chest Pain , Diagnose, Angina
- ID, 005, Name, Hassan, Age, 50, Type, Simple Care, Symptoms, Back Pain , Diagnose, Arthritis
