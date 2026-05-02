@@ -952,38 +952,39 @@ public:
 
 // forward declaration to allow friend class access
 class Pharmacy;
-void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm);
+void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm, appointmentScheduling& scheduler, int& unreadFeedback);
 
 // core pharmacy system
+// updated to enforce static capacity limits on dynamically sized arrays
 class Pharmacy {
 private:
     Pmedicine* inventory;
     int medCount;
-    int medCapacity;
+    const int MAX_MEDICINES = 200;
+
     Pmedicine* purchased;
     int purchasedCount;
+    const int MAX_PURCHASES = 100;
+
     ReorderRequest* requests;
     int requestCount;
-    int requestCapacity;
+    const int MAX_REORDERS = 50;
 
-    friend void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm);
+    friend void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm, appointmentScheduling& scheduler, int& unreadFeedback);
 
 public:
     Pharmacy() {
-        medCapacity = 100;
         medCount = 0;
         purchasedCount = 0;
-        inventory = new Pmedicine[medCapacity];
-        purchased = new Pmedicine[100];
-
-        requestCapacity = 50;
         requestCount = 0;
-        requests = new ReorderRequest[requestCapacity];
+        inventory = nullptr;
+        purchased = nullptr;
+        requests = nullptr;
     }
     ~Pharmacy() {
-        delete[] inventory;
-        delete[] purchased;
-        delete[] requests;
+        if (inventory != nullptr) delete[] inventory;
+        if (purchased != nullptr) delete[] purchased;
+        if (requests != nullptr) delete[] requests;
     }
 
     Pmedicine* getPurchasedList() {
@@ -995,13 +996,26 @@ public:
     }
 
     void clearPurchasedCart() {
+        if (purchased != nullptr) {
+            delete[] purchased;
+            purchased = nullptr;
+        }
         purchasedCount = 0;
     }
+
     void addMedicine(Pmedicine m) {
-        if (medCount < medCapacity) {
-            inventory[medCount] = m;
-            medCount++;
+        if (medCount >= MAX_MEDICINES) {
+            cout << "Pharmacy inventory is at full capacity (" << MAX_MEDICINES << ")." << endl;
+            return;
         }
+        Pmedicine* newInv = new Pmedicine[medCount + 1];
+        for (int i = 0; i < medCount; i++) {
+            newInv[i] = inventory[i];
+        }
+        newInv[medCount] = m;
+        if (inventory != nullptr) delete[] inventory;
+        inventory = newInv;
+        medCount++;
     }
 
     int findMedicine(string name) {
@@ -1022,22 +1036,46 @@ public:
         }
     }
 
-    // appends low stock items to a separate text file
+    // appends low stock items to a separate text file dynamically 
     void sendReorder(string name, string type, int qty) {
-        if (requestCount < requestCapacity) {
-            requests[requestCount].setData(name, type, qty);
-            requestCount++;
-
-            ofstream outfile("reorders.txt", ios::app);
-            outfile << name << "," << type << "," << qty << endl;
-            outfile.close();
+        if (requestCount >= MAX_REORDERS) {
+            cout << "Reorder list is at full capacity (" << MAX_REORDERS << ")." << endl;
+            return;
         }
+        ReorderRequest* newReq = new ReorderRequest[requestCount + 1];
+        for (int i = 0; i < requestCount; i++) {
+            newReq[i] = requests[i];
+        }
+        newReq[requestCount].setData(name, type, qty);
+        if (requests != nullptr) delete[] requests;
+        requests = newReq;
+        requestCount++;
+
+        ofstream outfile("reorders.txt", ios::app);
+        outfile << name << "," << type << "," << qty << endl;
+        outfile.close();
+    }
+
+    // helper function to resize and append to purchased tracking array
+    void addPurchased(Pmedicine m, int qty) {
+        if (purchasedCount >= MAX_PURCHASES) {
+            cout << "Purchase cart is full!" << endl;
+            return;
+        }
+        Pmedicine* newPurch = new Pmedicine[purchasedCount + 1];
+        for (int i = 0; i < purchasedCount; i++) {
+            newPurch[i] = purchased[i];
+        }
+        newPurch[purchasedCount] = m;
+        newPurch[purchasedCount].setQuantity(qty);
+        if (purchased != nullptr) delete[] purchased;
+        purchased = newPurch;
+        purchasedCount++;
     }
 
     // prescription processing logic
     // checks requested medicine quantities against current inventory
-    // if enough stock, deducts and adds to purchased array
-    // if partial stock, deducts available, adds to purchased array, and triggers reorder
+    // dynamically scales arrays upward avoiding pre-allocated gaps
     void presProcess(prescription& p) {
         for (int i = 0; i < p.getCount(); i++)
         {
@@ -1053,19 +1091,14 @@ public:
             }
             if (inventory[index].isQuantityEnough(reqQty)) {
                 inventory[index].reduceStock(reqQty);
-                purchased[purchasedCount] = inventory[index];
-                purchased[purchasedCount].setQuantity(reqQty);
-                purchasedCount++;
+                addPurchased(inventory[index], reqQty);
             }
             else {
                 int available = inventory[index].getQuantity();
 
                 if (available > 0) {
                     cout << "Only available quantity is " << available << endl;
-                    purchased[purchasedCount] = inventory[index];
-                    purchased[purchasedCount].setQuantity(available);
-                    purchasedCount++;
-
+                    addPurchased(inventory[index], available);
                     inventory[index].reduceStock(available);
                     sendReorder(n, inventory[index].getType(), reqQty - available);
                 }
@@ -1203,59 +1236,138 @@ void generateFinalBill(doctor* assignedDoctor, Pmedicine* meds, int numMeds)
 }
 
 // array resizing and file saving logic
-// checks if size meets capacity bounds, dynamically allocates new larger array
+// checks if size meets capacity bounds, dynamically allocates new larger array +1
 // copies old data to new array and deletes old pointer memory
-void addDoctor(doctor*& Doctors, int& s, int& cap) {
-    if (s >= cap) {
-        cap = cap + 3;
-        doctor* newArr = new doctor[cap];
-        for (int i = 0; i < s; i++) {
-            newArr[i] = Doctors[i];
-        }
-        delete[] Doctors;
-        Doctors = newArr;
+void addDoctor(doctor*& Doctors, int& s, const int MAX_DOCS) {
+    if (s >= MAX_DOCS) {
+        cout << "Error: Hospital has reached maximum doctor capacity (" << MAX_DOCS << ")." << endl;
+        return;
     }
+    doctor* newArr = new doctor[s + 1];
+    for (int i = 0; i < s; i++) {
+        newArr[i] = Doctors[i];
+    }
+
+    cout << "Enter doctor ID: ";
+    string id;
+    cin >> id;
+    cout << "Enter doctor name: ";
+    string name;
+    cin >> name;
+    cout << "Enter doctor age: ";
+    int age;
+    cin >> age;
+    cout << "Enter doctor specialization: ";
+    string type;
+    cin >> type;
+    cout << "Enter doctor status: ";
+    string status;
+    cin >> status;
+    cout << "Enter doctor fee: ";
+    int fee;
+    cin >> fee;
+    cout << "Enter doctor salary: ";
+    int salary;
+    cin >> salary;
+    newArr[s] = doctor(id, name, age, type, status, fee, salary, false, NULL);
+
+    if (Doctors != nullptr) delete[] Doctors;
+    Doctors = newArr;
+    s++;
+
     ofstream outFile("doctors.txt", ios::app);
     if (!outFile) {
         cout << "Error opening file." << endl;
         return;
     }
-    else
-    {
-        cout << "Enter doctor ID: ";
-        string id;
-        cin >> id;
-        cout << "Enter doctor name: ";
-        string name;
-        cin >> name;
-        cout << "Enter doctor age: ";
-        int age;
-        cin >> age;
-        cout << "Enter doctor specialization: ";
-        string type;
-        cin >> type;
-        cout << "Enter doctor status: ";
-        string status;
-        cin >> status;
-        cout << "Enter doctor fee: ";
-        int fee;
-        cin >> fee;
-        cout << "Enter doctor salary: ";
-        int salary;
-        cin >> salary;
-        Doctors[s] = doctor(id, name, age, type, status, fee, salary, false, NULL);
-        outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Fee: " << fee << ", Salary: " << salary << endl;
-        s++;
-        outFile.close();
-    }
+    outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Fee: " << fee << ", Salary: " << salary << endl;
+    outFile.close();
 }
 
-// displays all doctors
-void viewDoctors(doctor Doctors[], int& s)
+// displays all doctors and calculates ratings dynamically
+void viewDoctors(doctor Doctors[], int s)
 {
     cout << "List of Doctors:" << endl;
     for (int i = 0; i < s; i++) {
-        cout << "Name: " << Doctors[i].getcommonpersonName() << "  Specialization: " << Doctors[i].getdoctorType() << " Status: " << Doctors[i].getdoctorStatus() << endl;
+        string dName = Doctors[i].getcommonpersonName();
+        int totalRating = 0;
+        int count = 0;
+        ifstream revFile("doctor_reviews.txt");
+        string line;
+
+        // calculates avg rating directly from file on view
+        if (revFile) {
+            while (getline(revFile, line)) {
+                int pos = line.find(',');
+                if (pos != string::npos && line.substr(0, pos) == dName) {
+                    string rest = line.substr(pos + 1);
+                    int pos2 = rest.find(',');
+                    if (pos2 != string::npos) {
+                        totalRating += stoi(rest.substr(0, pos2));
+                        count++;
+                    }
+                }
+            }
+            revFile.close();
+        }
+
+        double avg = count > 0 ? (double)totalRating / count : 0.0;
+        string ratingStr = count > 0 ? to_string(avg).substr(0, 3) : "No ratings";
+
+        cout << "Name: " << dName
+            << "  Specialization: " << Doctors[i].getdoctorType()
+            << " Status: " << Doctors[i].getdoctorStatus()
+            << " Avg Rating: " << ratingStr << " (" << count << " reviews)" << endl;
+    }
+}
+
+// view specified doctor reviews from text file
+void viewDoctorReviews() {
+    cout << "Enter doctor name to view reviews: ";
+    string name;
+    cin >> name;
+    ifstream revFile("doctor_reviews.txt");
+    string line;
+    bool found = false;
+    if (revFile) {
+        cout << "--- Reviews for Dr. " << name << " ---" << endl;
+        while (getline(revFile, line)) {
+            int pos = line.find(',');
+            if (pos != string::npos) {
+                string dName = line.substr(0, pos);
+                if (dName == name) {
+                    found = true;
+                    string rest = line.substr(pos + 1);
+                    int pos2 = rest.find(',');
+                    string rating = rest.substr(0, pos2);
+                    string review = rest.substr(pos2 + 1);
+                    cout << "Rating: " << rating << "/5 | Review: " << review << endl;
+                }
+            }
+        }
+        revFile.close();
+    }
+    if (!found) cout << "No reviews found for this doctor." << endl;
+}
+
+// submit new review and rating 
+void rateDoctor() {
+    cout << "Enter doctor name to rate: ";
+    string name;
+    cin >> name;
+    cout << "Enter rating (1 to 5): ";
+    int rating;
+    cin >> rating;
+    cout << "Enter your review: ";
+    string review;
+    cin.ignore();
+    getline(cin, review);
+
+    ofstream revFile("doctor_reviews.txt", ios::app);
+    if (revFile) {
+        revFile << name << "," << rating << "," << review << endl;
+        revFile.close();
+        cout << "Thank you! Rating submitted successfully." << endl;
     }
 }
 
@@ -1270,6 +1382,18 @@ void removeDoctor(doctor*& Doctors, int& s) {
                 Doctors[j] = Doctors[j + 1];
             }
             s--;
+
+            // Reallocating downwards dynamically
+            doctor* newArr = nullptr;
+            if (s > 0) {
+                newArr = new doctor[s];
+                for (int k = 0; k < s; k++) {
+                    newArr[k] = Doctors[k];
+                }
+            }
+            delete[] Doctors;
+            Doctors = newArr;
+
             ofstream outFile("doctors.txt");
             if (outFile) {
                 for (int k = 0; k < s; k++) {
@@ -1293,8 +1417,9 @@ void seePatientDetails(patient Patients[], int s) {
 }
 
 // displays room occupancy status
-void seeRoomDetails(Room* rooms[], int& s) {
+void seeRoomDetails(Room** rooms, int s) {
     cout << "List of Rooms:" << endl;
+    if (s == 0) cout << "No rooms currently allocated." << endl;
     for (int i = 0; i < s; i++) {
         rooms[i]->displayRoomInfo();
         cout << endl;
@@ -1308,7 +1433,7 @@ void seeAppointmentDetails(appointmentScheduling& scheduler) {
 }
 
 // modifies patient data
-void editPatientDetails(patient Patients[], int &s) {
+void editPatientDetails(patient Patients[], int& s) {
     cout << "Enter patient name to edit: ";
     string name;
     cin >> name;
@@ -1331,7 +1456,7 @@ void editPatientDetails(patient Patients[], int &s) {
 }
 
 // modify doctor data
-void editDoctorDetails(doctor Doctors[], int &s) {
+void editDoctorDetails(doctor Doctors[], int& s) {
     cout << "Enter doctor name to edit: ";
     string name;
     cin >> name;
@@ -1360,7 +1485,7 @@ void editDoctorDetails(doctor Doctors[], int &s) {
 }
 
 // changes specialization
-void editSpecialization(doctor Doctors[], int &s) {
+void editSpecialization(doctor Doctors[], int& s) {
     cout << "Enter doctor name to edit specialization: ";
     string name;
     cin >> name;
@@ -1379,7 +1504,7 @@ void editSpecialization(doctor Doctors[], int &s) {
 }
 
 // sets doctor status flag
-void editStatus(doctor*& Doctors, int &s) {
+void editStatus(doctor*& Doctors, int& s) {
     cout << "Enter doctor name to edit status: ";
     string name;
     cin >> name;
@@ -1527,9 +1652,29 @@ void viewSignupDetails()
     }
 }
 
+// views feedback from patients
+void viewFeedback()
+{
+    cout << "--- Patient Feedback ---" << endl;
+    string dummy;
+    ifstream fbFile("feedback.txt");
+    if (fbFile) {
+        while (getline(fbFile, dummy)) {
+            cout << dummy << endl;
+        }
+        fbFile.close();
+    }
+    else {
+        cout << "No feedback records found." << endl;
+    }
+}
+
 // admin portal menu
-void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], int room_c, appointmentScheduling& scheduler, int& ds, int& ps, int& dcap, int& pcap) {
+void adminPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& ds, int& ps, const int MAX_DOCS, const int MAX_PATS, int& unreadFeedback) {
     cout << "Welcome to the Admin Portal" << endl;
+    if (unreadFeedback > 0) {
+        cout << " NOTIFICATION: You have " << unreadFeedback << " unread patient feedbacks/complaints! " << endl;
+    }
     cout << "1. Add Doctor" << endl;
     cout << "2. View Doctors" << endl;
     cout << "3. Remove Doctor" << endl;
@@ -1540,14 +1685,15 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], int room_c
     cout << "8. edit patient details" << endl;
     cout << "9. Manage Leave Requests" << endl;
     cout << "10. View Signup Details" << endl;
-    cout << "11. exit" << endl;
+    cout << "11. View Feedback" << endl;
+    cout << "12. exit" << endl;
 
     int choice;
     cout << "Enter your choice: ";
     cin >> choice;
     if (choice == 1) {
         cout << "Adding a new doctor" << endl;
-        addDoctor(Doctors, ds, dcap);
+        addDoctor(Doctors, ds, MAX_DOCS);
     }
     else if (choice == 2)
     {
@@ -1631,6 +1777,11 @@ void adminPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], int room_c
     }
     else if (choice == 11)
     {
+        viewFeedback();
+        unreadFeedback = 0; // resets counter upon reading
+    }
+    else if (choice == 12)
+    {
         cout << "Exiting Admin Portal" << endl;
     }
     else
@@ -1709,99 +1860,56 @@ void viewPrescription(patient Patients[], int s) {
     }
 }
 
-// manual status update
-void setStatus(doctor*& Doctors, int& s) {
-    cout << "Enter doctor name to set status: ";
-    string name;
-    cin >> name;
-    for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
-            cout << "Setting status for Dr. " << name << endl;
-            string status;
-            cout << "New Status: ";
-            cin >> status;
-            Doctors[i].setdoctorStatus(status);
-            cout << "Doctor status changed successfully." << endl;
-            return;
-        }
-    }
-    cout << "Doctor not found." << endl;
-}
-
-// manual fee update
-void setFee(doctor*& Doctors, int& s) {
-    cout << "Enter doctor name to set fee: ";
-    string name;
-    cin >> name;
-    for (int i = 0; i < s; i++) {
-        if (Doctors[i].getcommonpersonName() == name) {
-            cout << "Setting fee for Dr. " << name << endl;
-            int fee;
-            cout << "New Fee: ";
-            cin >> fee;
-            Doctors[i].setdoctorFee(fee);
-            cout << "Doctor fee changed successfully." << endl;
-            return;
-        }
-    }
-    cout << "Doctor not found." << endl;
-}
-
-// view scheduling
-void seeAppointments(appointmentScheduling& scheduler) {
-    cout << "Viewing appointments" << endl;
-    scheduler.successfulAppointment();
-}
-
 // array resizing and file saving logic
 // dynamically assigns larger array capacity when bounds are reached
 // prevents memory leak by safely copying existing indices
-void addPatient(patient*& Patients, int& s, int& capa) {
-    if (s >= capa) {
-        capa = capa + 3;
-        patient* newArr = new patient[capa];
-        for (int i = 0; i < s; i++) {
-            newArr[i] = Patients[i];
-        }
-        delete[] Patients;
-        Patients = newArr;
+void addPatient(patient*& Patients, int& s, const int MAX_PATS) {
+    if (s >= MAX_PATS) {
+        cout << "Error: Hospital has reached maximum patient capacity (" << MAX_PATS << ")." << endl;
+        return;
     }
+    patient* newArr = new patient[s + 1];
+    for (int i = 0; i < s; i++) {
+        newArr[i] = Patients[i];
+    }
+
+    cout << "Enter patient ID" << endl;
+    string id;
+    cin >> id;
+    cout << "Enter patient symptoms" << endl;
+    string symptom;
+    cin >> symptom;
+    cout << "Enter the patient diagnosis" << endl;
+    string diagnose;
+    cin >> diagnose;
+    cout << "Enter patient name: ";
+    string name;
+    cin >> name;
+    cout << "Enter patient age: ";
+    int age;
+    cin >> age;
+    cout << "Enter patient type: ";
+    string type;
+    cin >> type;
+    newArr[s] = patient(id, name, age, type, symptom, diagnose);
+
+    if (Patients != nullptr) delete[] Patients;
+    Patients = newArr;
+    s++;
+
     ofstream outFile("patients.txt", ios::app);
     if (!outFile) {
         cout << "Error opening file." << endl;
         return;
     }
-    else
-    {
-        cout << "Enter patient ID" << endl;
-        string id;
-        cin >> id;
-        cout << "Enter patient symptoms" << endl;
-        string symptom;
-        cin >> symptom;
-        cout << "Enter the patient diagnosis" << endl;
-        string diagnose;
-        cin >> diagnose;
-        cout << "Enter patient name: ";
-        string name;
-        cin >> name;
-        cout << "Enter patient age: ";
-        int age;
-        cin >> age;
-        cout << "Enter patient type: ";
-        string type;
-        cin >> type;
-        Patients[s] = patient(id, name, age, type, symptom, diagnose);
-        outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Symptoms: " << symptom << ", Diagnosis: " << diagnose << endl;
-        s++;
-        outFile.close();
+    outFile << "Name: " << name << ", ID: " << id << ", Age: " << age << ", Type: " << type << ", Symptoms: " << symptom << ", Diagnosis: " << diagnose << endl;
+    outFile.close();
 
-        ofstream hrFile("health_records.txt", ios::app);
-        if (hrFile)
-        {
-            hrFile << name << "," << symptom << "," << diagnose << endl;
-            hrFile.close();
-        }
+    ofstream hrFile("health_records.txt", ios::app);
+    if (hrFile)
+    {
+        hrFile << name << "," << symptom << "," << diagnose << endl;
+        hrFile.close();
     }
 }
 
@@ -1816,6 +1924,17 @@ void removePatient(patient*& Patients, int& s) {
                 Patients[j] = Patients[j + 1];
             }
             s--;
+
+            patient* newArr = nullptr;
+            if (s > 0) {
+                newArr = new patient[s];
+                for (int k = 0; k < s; k++) {
+                    newArr[k] = Patients[k];
+                }
+            }
+            delete[] Patients;
+            Patients = newArr;
+
             cout << "Patient " << name << " removed successfully." << endl;
             return;
         }
@@ -1852,10 +1971,10 @@ void applyLeave(doctor Doctors[], int s)
 }
 
 // doctor portal menu
-void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointmentScheduling& scheduler, int& doc_s, int& pat_s, int& doc_capa, int& pat_capa) {
+void doctorPortal(doctor*& Doctors, patient*& Patients, Room**& rooms, int& room_c, appointmentScheduling& scheduler, int& doc_s, int& pat_s, const int MAX_DOCS, const int MAX_PATS, const int MAX_ROOMS) {
     cout << "Welcome to the Doctor Portal" << endl;
     int choice = 0;
-    while (choice != 10) {
+    while (choice != 12) {
         cout << "Press key to perform task " << endl;
         cout << "1. View all Patients" << endl;
         cout << "2. View Patient's Health Record" << endl;
@@ -1866,7 +1985,9 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
         cout << "7. Add Patient" << endl;
         cout << "8. Remove Patient" << endl;
         cout << "9. Apply for Leave" << endl;
-        cout << "10. exit " << endl;
+        cout << "10. Admit Patient to Room" << endl;
+        cout << "11. Release Room" << endl;
+        cout << "12. exit " << endl;
         cin >> choice;
         switch (choice)
         {
@@ -1889,7 +2010,7 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
             seeAppointments(scheduler);
             break;
         case 7:
-            addPatient(Patients, pat_s, pat_capa);
+            addPatient(Patients, pat_s, MAX_PATS);
             break;
         case 8:
             removePatient(Patients, pat_s);
@@ -1897,15 +2018,67 @@ void doctorPortal(doctor*& Doctors, patient*& Patients, Room* rooms[], appointme
         case 9:
             applyLeave(Doctors, doc_s);
             break;
+        case 10:
+        {
+            if (room_c >= MAX_ROOMS) {
+                cout << "Error: Hospital is at full capacity (" << MAX_ROOMS << " rooms). Cannot admit more patients untill the rooms are cleared." << endl;
+            }
+            else {
+                Room** newRooms = new Room * [room_c + 1];
+                for (int i = 0; i < room_c; i++) {
+                    newRooms[i] = rooms[i];
+                }
+                newRooms[room_c] = new GeneralRoom(room_c + 1, "General", true);
+                if (rooms != nullptr) {
+                    delete[] rooms;
+                }
+                rooms = newRooms;
+                room_c++;
+                cout << "Patient successfully admitted to Room " << room_c << "." << endl;
+            }
+        }
+        break;
+        case 11:
+        {
+            cout << "Enter room number to release: ";
+            int rNum;
+            cin >> rNum;
+            bool found = false;
+            for (int i = 0; i < room_c; i++) {
+                if (rooms[i]->getNumber() == rNum) {
+                    found = true;
+                    rooms[i]->releaseRoom();
+                    delete rooms[i];
+
+                    Room** newRooms = nullptr;
+                    if (room_c - 1 > 0) {
+                        newRooms = new Room * [room_c - 1];
+                        int idx = 0;
+                        for (int j = 0; j < room_c; j++) {
+                            if (j != i) {
+                                newRooms[idx++] = rooms[j];
+                            }
+                        }
+                    }
+                    delete[] rooms;
+                    rooms = newRooms;
+                    room_c--;
+                    cout << "Room " << rNum << " cleared and deallocated." << endl;
+                    break;
+                }
+            }
+            if (!found) cout << "Room not found." << endl;
+        }
+        break;
         default:
-            cout << "work" << endl;
+            if (choice != 12) cout << "work" << endl;
         }
     }
     cout << "Thanks you for visiting..." << endl;
 }
 
 // patient portal menu 
-void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm)
+void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize, Pharmacy& pharm, appointmentScheduling& scheduler, int& unreadFeedback)
 {
     int choice = 0;
     while (choice != 8)
@@ -1924,11 +2097,35 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
         switch (choice)
         {
         case 1:
-            // viewDoctors(d, doctorSize); 
-            break;
+        {
+            viewDoctors(Doctors, docSize);
+            cout << "\n1. Read Doctor Reviews\n2. Rate a Doctor\n3. Go Back\nChoice: ";
+            int subChoice;
+            cin >> subChoice;
+            if (subChoice == 1) {
+                viewDoctorReviews();
+            }
+            else if (subChoice == 2) {
+                rateDoctor();
+            }
+        }
+        break;
         case 2:
-            //as->scheduleAppointment( p , d , doctorSize); 
-            break;
+        {
+            cout << "Enter your patient name to book appointment: ";
+            string pName;
+            cin >> pName;
+            bool found = false;
+            for (int i = 0; i < patSize; i++) {
+                if (Patients[i].getcommonpersonName() == pName) {
+                    scheduler.scheduleAppointment(Patients[i], Doctors, docSize);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) cout << "Patient not found. Please register first." << endl;
+        }
+        break;
         case 3:
             viewHealthRecord(Patients, patSize);
             break;
@@ -1974,13 +2171,37 @@ void patientPortal(doctor* Doctors, int docSize, patient* Patients, int patSize,
 
             break;
         case 6:
-            // after maing admin class
-            break;
+        {
+            cout << "Enter your complaint: ";
+            string comp;
+            cin.ignore();
+            getline(cin, comp);
+            ofstream fb("feedback.txt", ios::app);
+            if (fb) {
+                fb << "Complaint: " << comp << endl;
+                fb.close();
+                unreadFeedback++;
+                cout << "Complaint submitted." << endl;
+            }
+        }
+        break;
         case 7:
-            //after making class 
-            break;
+        {
+            cout << "Enter your suggestion: ";
+            string sugg;
+            cin.ignore();
+            getline(cin, sugg);
+            ofstream fb("feedback.txt", ios::app);
+            if (fb) {
+                fb << "Suggestion: " << sugg << endl;
+                fb.close();
+                unreadFeedback++;
+                cout << "Suggestion submitted." << endl;
+            }
+        }
+        break;
         default:
-            cout << "work" << endl;
+            if (choice != 8) cout << "work" << endl;
         }
     }
 
@@ -2206,6 +2427,16 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
         hrCheck.close();
     }
 
+    // creating review file logic if empty
+    ifstream revCheck("doctor_reviews.txt");
+    if (!revCheck) {
+        ofstream makeRev("doctor_reviews.txt");
+        makeRev.close();
+    }
+    else {
+        revCheck.close();
+    }
+
     int loopController = 0;
     string dummy;
     ifstream infilecountingdoc("doctor.txt");
@@ -2218,7 +2449,9 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
         docSize++;
     }
     infilecountingdoc.close();
-    docPtr = new doctor[docSize];
+    if (docSize > 0) docPtr = new doctor[docSize];
+    else docPtr = nullptr;
+
     ifstream infilecountingpatient("patient.txt");
     if (!infilecountingpatient)
     {
@@ -2229,7 +2462,8 @@ void bootup(doctor*& docPtr, patient*& patPtr, int& docSize, int& patSize, Pharm
         patSize++;
     }
     infilecountingpatient.close();
-    patPtr = new patient[patSize];
+    if (patSize > 0) patPtr = new patient[patSize];
+    else patPtr = nullptr;
 
     // doctor loading logic
     ifstream doctorfile("doctor.txt");
@@ -2317,17 +2551,24 @@ int main()
     int doctorSize = 0;
     int patientSize = 0;
 
-    int docCapacity = 100;
-    int patCapacity = 100;
+    // Static upperbound constraints passed structurally
+    const int MAX_DOCTORS = 100;
+    const int MAX_PATIENTS = 500;
+    const int MAX_HOSPITAL_ROOMS = 100;
 
-    Room* rooms[100];
+    Room** rooms = nullptr;
     int roomCount = 0;
+
+    // Notification flag counter for the admin portal
+    int unreadFeedback = 0;
 
     Pharmacy pharm;
     appointmentScheduling scheduler;
 
     bool registrationVerifier = false;
 
+    // Bootup is called; pointers are instantiated perfectly to size found on disk. 
+    // No wasted array blocks.
     bootup(doctorPtr, patientPtr, doctorSize, patientSize, pharm);
 
     cout << "-----Welcome to the Hospital Managment System------" << endl;
@@ -2346,7 +2587,7 @@ int main()
             if (registrationVerifier)
             {
                 cout << "admin works \n";
-                adminPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, docCapacity, patCapacity);
+                adminPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, unreadFeedback);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2356,7 +2597,7 @@ int main()
             registrationVerifier = registrationportal("Doctor", "DoctorPasswords.txt");
             if (registrationVerifier)
             {
-                doctorPortal(doctorPtr, patientPtr, rooms, scheduler, doctorSize, patientSize, docCapacity, patCapacity);
+                doctorPortal(doctorPtr, patientPtr, rooms, roomCount, scheduler, doctorSize, patientSize, MAX_DOCTORS, MAX_PATIENTS, MAX_HOSPITAL_ROOMS);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2367,7 +2608,7 @@ int main()
             registrationVerifier = registrationportal("Patient", "PatientPasswords.txt");
             if (registrationVerifier)
             {
-                patientPortal(doctorPtr, doctorSize, patientPtr, patientSize, pharm);
+                patientPortal(doctorPtr, doctorSize, patientPtr, patientSize, pharm, scheduler, unreadFeedback);
             }
             else
                 cout << "Registration Failed" << endl;
@@ -2385,6 +2626,14 @@ int main()
     if (patientPtr != nullptr)
     {
         delete[] patientPtr;
+    }
+    if (rooms != nullptr)
+    {
+        for (int i = 0; i < roomCount; i++)
+        {
+            delete rooms[i];
+        }
+        delete[] rooms;
     }
 
     return 0;
