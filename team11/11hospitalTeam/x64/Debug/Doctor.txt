@@ -1,0 +1,4 @@
+Dr.Yousaf,002,38,free,General,1900,140
+Dr.Hamdan,003,50,busy,General,2100,160
+dr.usman,010,23,busy,cardiologist,3,245666
+dr.shahmeer,345,21,busy,optamologist GOAT,3499,483875

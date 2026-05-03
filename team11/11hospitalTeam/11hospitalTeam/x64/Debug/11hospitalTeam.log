@@ -1,0 +1,36 @@
+﻿   Qt/MSBuild: 3.5.0.0
+   Qt: 6.11.0
+  hospitalsystem.cpp
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitaldata.h(746,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '../hospitalsystem.cpp')
+  
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitaldata.h(749,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '../hospitalsystem.cpp')
+  
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitaldata.h(752,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '../hospitalsystem.cpp')
+  
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(50,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(51,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(52,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(53,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(54,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(55,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(76,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(77,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(78,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(79,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(80,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(101,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(121,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(349,21): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(357,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(358,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(359,28): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(565,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(572,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(573,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(574,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(592,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\hospitalsystem.cpp(597,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  11hospitalTeam.vcxproj -> C:\Users\lenovo\OneDrive\Desktop\team11\11hospitalTeam\x64\Debug\11hospitalTeam.exe

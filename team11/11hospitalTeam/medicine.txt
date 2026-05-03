@@ -1,0 +1,4 @@
+Panadol,Syrup,100,10.5
+Augmentin,Tablet,50,550.0
+Insulin,Injection,20,1250.0
+Arinac,Tablet,200,15.0

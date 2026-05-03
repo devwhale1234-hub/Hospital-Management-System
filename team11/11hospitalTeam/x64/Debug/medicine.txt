@@ -1,0 +1,5 @@
+Panadol,Syrup,55,10.5
+Augmentin,Tablet,50,550
+Insulin,Injection,20,1250
+Arinac,Tablet,70,15
+Panabdullahadol,tablet,3161,9

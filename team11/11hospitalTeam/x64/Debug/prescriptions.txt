@@ -1,0 +1,9 @@
+Ali,Panadol,2,MorningSara,Panadol,Syrup,1,2
+Sara,Panadol,Syrup,1,Morning
+Sara,Arinac,Tablet,1,Evening
+Sara,Panadol,Syrup,20,Evevning
+Sara,Arinac,Tablet,24,Evening
+Ali,Panadol,syrup,12,Morning
+Ali,Arinac,Tablet,78,Morning
+Ali,Panadol,syrup,12,Morning
+Ali,Arinac,Tablet,78,Morning

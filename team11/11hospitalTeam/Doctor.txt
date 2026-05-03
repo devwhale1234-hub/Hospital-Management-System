@@ -1,0 +1,3 @@
+Dr.Usman,001,45,free,General,2000,150.000
+Dr.Yousaf,002,38,free,General,1900,140.000
+Dr.Hamdan,003,50,busy,General,2100,160.000
